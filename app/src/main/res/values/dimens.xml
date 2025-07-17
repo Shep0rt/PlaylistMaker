@@ -10,7 +10,9 @@
     <dimen name="settings_text_size_title">22sp</dimen>
     <dimen name="list_item_margin_top">42dp</dimen>
     <dimen name="setting_text_size">16sp</dimen>
-    <dimen name="linear_layout_padding_start">16dp</dimen>
-    <dimen name="linear_layout_padding_end">12dp</dimen>
+    <dimen name="material_padding_start">16dp</dimen>
+    <dimen name="material_padding_end">12dp</dimen>
+    <dimen name="material_padding_top">21dp</dimen>
+    <dimen name="material_padding_bottom">21dp</dimen>
 
 </resources>
