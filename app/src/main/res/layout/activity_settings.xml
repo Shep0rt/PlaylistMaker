@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/root_layout"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/white">
+
+    <com.google.android.material.appbar.MaterialToolbar
+        android:id="@+id/settings_toolbar"
+        android:layout_width="match_parent"
+        android:layout_height="?attr/actionBarSize"
+        android:background="@color/white"
+        app:navigationIcon="@drawable/ic_arrow_back"
+        app:title="@string/settings"
+        app:titleTextAppearance="@style/ToolbarTitleText"
+        android:layout_marginBottom="24dp" />
+
+    <com.google.android.material.switchmaterial.SwitchMaterial
+        android:id="@+id/theme_switch"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/theme_dark"
+        android:textAppearance="@style/SettingsText"
+        android:background="@drawable/switch_ripple_background"
+        android:paddingStart="@dimen/material_padding_start"
+        android:paddingEnd="@dimen/material_padding_end"
+        android:paddingTop="@dimen/material_padding_top"
+        android:paddingBottom="@dimen/material_padding_bottom"
+        app:thumbTint="@color/switch_thumb_color"
+        app:trackTint="@color/switch_track_color" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/share_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/share"
+        android:textAppearance="@style/SettingsText"
+        android:drawableEnd="@drawable/ic_share"
+        android:paddingStart="@dimen/material_padding_start"
+        android:paddingEnd="@dimen/material_padding_end"
+        android:paddingTop="@dimen/material_padding_top"
+        android:paddingBottom="@dimen/material_padding_bottom" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/support"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/support"
+        android:textAppearance="@style/SettingsText"
+        android:drawableEnd="@drawable/ic_support"
+        android:paddingStart="@dimen/material_padding_start"
+        android:paddingEnd="@dimen/material_padding_end"
+        android:paddingTop="@dimen/material_padding_top"
+        android:paddingBottom="@dimen/material_padding_bottom" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/user_agreement"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/user_agreement"
+        android:textAppearance="@style/SettingsText"
+        android:drawableEnd="@drawable/ic_arrow_right"
+        android:paddingStart="@dimen/material_padding_start"
+        android:paddingEnd="@dimen/material_padding_end"
+        android:paddingTop="@dimen/material_padding_top"
+        android:paddingBottom="@dimen/material_padding_bottom" />
+
+</LinearLayout>
