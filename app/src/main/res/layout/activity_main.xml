@@ -1,44 +1,40 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:theme="@style/Theme.PlaylistMaker.Main"
     android:id="@+id/root_layout"
-    android:orientation="vertical"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/blue">
-
+    android:background="?attr/colorPrimary"
+    android:orientation="vertical">
 
     <com.google.android.material.appbar.MaterialToolbar
         android:id="@+id/topAppBar"
-        android:layout_width="match_parent"
-        android:layout_height="?attr/actionBarSize"
-        android:background="@color/blue"
-        app:title="@string/app_name"
-        app:titleTextColor="@color/white"
-        app:titleTextAppearance="@style/ToolbarTitleText"
         android:layout_marginBottom="24dp"
-        app:contentInsetStart="@dimen/main_button_margin_horizontal"/>
+        app:contentInsetStart="@dimen/main_button_margin_horizontal"
+        app:title="@string/app_name"
+        style="@style/MainToolbar" />
 
     <Button
-        style="@style/MainButton"
         android:id="@+id/btn_search"
+        style="@style/MainButton"
         android:text="@string/search"
-        app:icon="@drawable/ic_vector" />
+        app:icon="@drawable/ic_search24" />
 
     <Button
-        style="@style/MainButton"
         android:id="@+id/btn_media_library"
+        style="@style/MainButton"
+        android:layout_marginTop="@dimen/main_button_margin_top"
         android:text="@string/media_library"
-        app:icon="@drawable/ic_media_library"
-        android:layout_marginTop="@dimen/main_button_margin_top" />
+        app:icon="@drawable/ic_media_library" />
 
     <Button
-        style="@style/MainButton"
         android:id="@+id/btn_settings"
+        style="@style/MainButton"
+        android:layout_marginTop="@dimen/main_button_margin_top"
         android:text="@string/settings"
         app:icon="@drawable/ic_settings"
-        android:layout_marginTop="@dimen/main_button_margin_top"
-        android:layout_marginBottom="28dp"/>
+        android:layout_marginBottom="28dp" />
 
 </LinearLayout>
