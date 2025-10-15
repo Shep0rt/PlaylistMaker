@@ -8,4 +8,12 @@
     <string name="support">Написать в поддержку</string>
     <string name="user_agreement">Пользовательское соглашение</string>
     <string name="back_button_description">Назад</string>
+    <string name="share_app_text">Курс по Андроид-разработке в Практикуме: https://practicum.yandex.kz/android-developer</string>
+    <string name="share_app_title">Поделиться приложением через:</string>
+    <string name="support_subject">Сообщение разработчикам и разработчицам приложения Playlist Maker</string>
+    <string name="support_body">Спасибо разработчикам и разработчицам за крутое приложение!</string>
+    <string name="email_address">pavel.michka@yandex.ru</string>
+    <string name="practicum_offer">https://yandex.ru/legal/practicum_offer/</string>
+    <string name="error_not_app_link">Нет приложения для открытия ссылки</string>
+    <string name="error_not_app_email">Нет приложения для отправки e-mail</string>
 </resources>
