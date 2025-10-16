@@ -16,10 +16,11 @@
         app:title="@string/search"
         style="@style/SearchToolbar" />
 
-    <FrameLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp" >
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="32dp">
 
         <EditText
             android:id="@+id/search_edit_text"
@@ -29,17 +30,31 @@
             android:maxLines="1"
             android:drawableStart="@drawable/ic_search16"
             style="@style/SearchEditText"
-            android:imeOptions="actionDone" />
+            android:imeOptions="actionDone"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
         <ImageView
             android:id="@+id/clear_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_gravity="end|center_vertical"
-            android:layout_marginEnd="28dp"
+            android:contentDescription="@null"
             android:src="@drawable/ic_clear"
-            android:visibility="gone"
-            app:tint="?attr/colorOnSurfaceVariant" />
-    </FrameLayout>
+            app:tint="?attr/colorOnSurfaceVariant"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="@id/search_edit_text"
+            app:layout_constraintBottom_toBottomOf="@id/search_edit_text"
+            android:layout_marginEnd="28dp"
+            android:visibility="gone"/>
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/searchRecyclerView"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:listitem="@layout/item_track"
+        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+
 
 </LinearLayout>

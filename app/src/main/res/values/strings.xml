@@ -16,4 +16,5 @@
     <string name="practicum_offer">https://yandex.ru/legal/practicum_offer/</string>
     <string name="error_not_app_link">Нет приложения для открытия ссылки</string>
     <string name="error_not_app_email">Нет приложения для отправки e-mail</string>
+    <string name="search_track_dot"> • </string>
 </resources>

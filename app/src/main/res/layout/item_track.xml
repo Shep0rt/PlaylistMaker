@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingStart="13dp"
+    android:paddingEnd="12dp"
+    android:layout_marginBottom="16dp"
+    tools:theme="@style/Theme.PlaylistMaker.Search">
+
+    <ImageView
+        android:id="@+id/albumCover"
+        android:layout_width="45dp"
+        android:layout_height="45dp"
+        android:contentDescription="@null"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+    <TextView
+        android:id="@+id/trackName"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:maxLines="1"
+        android:ellipsize="end"
+        style="@style/SearchTrackName"
+        app:layout_constraintStart_toEndOf="@id/albumCover"
+        app:layout_constraintEnd_toStartOf="@id/ivChevron"
+        app:layout_constraintTop_toTopOf="@id/albumCover"
+        app:layout_constraintBottom_toTopOf="@id/artist"
+        app:layout_constraintVertical_chainStyle="packed" />
+
+    <TextView
+        android:id="@+id/artist"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:maxLines="1"
+        android:ellipsize="end"
+        style="@style/SearchTrackArtist"
+        app:layout_constraintStart_toStartOf="@id/trackName"
+        app:layout_constraintEnd_toStartOf="@id/trackDot"
+        app:layout_constraintTop_toBottomOf="@id/trackName"
+        app:layout_constraintBottom_toBottomOf="@id/albumCover"
+        app:layout_constraintWidth_default="wrap"
+        app:layout_constrainedWidth="true"
+        app:layout_constraintHorizontal_chainStyle="packed"
+        app:layout_constraintHorizontal_bias="0" />
+
+    <ImageView
+        android:id="@+id/trackDot"
+        android:layout_width="13dp"
+        android:layout_height="13dp"
+        style="@style/SearchTrackDot"
+        android:contentDescription="@null"
+        app:tint="?attr/colorItemTrack"
+        app:layout_constraintStart_toEndOf="@id/artist"
+        app:layout_constraintTop_toTopOf="@id/artist"
+        app:layout_constraintBottom_toBottomOf="@id/artist"
+        app:layout_constraintEnd_toStartOf="@id/duration" />
+
+    <TextView
+        android:id="@+id/duration"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        style="@style/SearchTrackDuration"
+        app:tint="?attr/colorItemTrack"
+        app:layout_constraintStart_toEndOf="@id/trackDot"
+        app:layout_constraintEnd_toEndOf="@id/trackName"
+        app:layout_constraintTop_toTopOf="@id/artist"
+        app:layout_constraintBottom_toBottomOf="@id/artist" />
+
+    <ImageView
+        android:id="@+id/ivChevron"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        style="@style/SearchTrackChevron"
+        android:contentDescription="@null"
+        app:tint="?attr/colorItemTrack"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
