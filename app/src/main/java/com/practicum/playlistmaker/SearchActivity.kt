@@ -13,7 +13,10 @@ import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
 import androidx.core.view.updatePadding
+import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.appbar.MaterialToolbar
+import com.practicum.playlistmaker.ui.search.TrackAdapter
+import com.practicum.playlistmaker.ui.search.mockTracks
 
 class SearchActivity : AppCompatActivity() {
     private var searchText: String = SEARCH_TEXT_DEF
@@ -42,6 +45,9 @@ class SearchActivity : AppCompatActivity() {
         val toolbar = findViewById<MaterialToolbar>(R.id.search_toolbar)
         val searchEditText = findViewById<EditText>(R.id.search_edit_text)
         val clearButton = findViewById<ImageView>(R.id.clear_button)
+        val recycler = findViewById<RecyclerView>(R.id.searchRecyclerView)
+        val adapter = TrackAdapter(mockTracks)
+        recycler.adapter = adapter
 
         //Действия при клике на кнопку "Назад" внутри раздела "Поиск"
         toolbar.setNavigationOnClickListener {

@@ -100,5 +100,33 @@
         <item name="android:paddingBottom">@dimen/edit_text_padding_bottom</item>
         <item name="android:drawablePadding">@dimen/edit_text_drawable_padding</item>
         <item name="android:textCursorDrawable">@drawable/edittext_cursor</item>
+        <item name="android:layout_marginBottom">@dimen/search_field_margin_bottom</item>
     </style>
+
+    <style name="SearchTrackName">
+        <item name="android:textColor">?attr/colorSurface</item>
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+        <item name="android:textSize">@dimen/search_text_size_trackName</item>
+    </style>
+
+    <style name="SearchTrackArtist">
+        <item name="android:textColor">?attr/colorItemTrack</item>
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+        <item name="android:textSize">@dimen/search_text_size_artist</item>
+    </style>
+
+    <style name="SearchTrackDuration">
+        <item name="android:textColor">?attr/colorItemTrack</item>
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+        <item name="android:textSize">@dimen/search_text_size_duration</item>
+    </style>
+
+    <style name="SearchTrackDot">
+        <item name="android:src">@drawable/ic_track_dot</item>
+    </style>
+
+    <style name="SearchTrackChevron">
+        <item name="android:src">@drawable/ic_arrow_right</item>
+    </style>
+
 </resources>
