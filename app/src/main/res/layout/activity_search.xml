@@ -30,7 +30,6 @@
             android:maxLines="1"
             android:drawableStart="@drawable/ic_search16"
             style="@style/SearchEditText"
-            android:imeOptions="actionDone"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -49,12 +48,28 @@
             android:visibility="gone"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 
-    <androidx.recyclerview.widget.RecyclerView
-        android:id="@+id/searchRecyclerView"
+    <FrameLayout
+        android:id="@+id/contentContainer"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:listitem="@layout/item_track"
-        app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"/>
+        android:layout_height="0dp"
+        android:layout_weight="1">
 
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/searchRecyclerView"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:visibility="gone"
+            app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
+            tools:listitem="@layout/item_track" />
+
+        <include
+            layout="@layout/search_not_result_placeholder"
+            android:id="@+id/not_result_placeholder" />
+
+        <include
+            layout="@layout/search_network_error_placeholder"
+            android:id="@+id/network_error_placeholder" />
+
+    </FrameLayout>
 
 </LinearLayout>
