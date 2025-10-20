@@ -26,8 +26,24 @@
     <dimen name="edit_text_padding_top">8.5dp</dimen>
     <dimen name="edit_text_padding_bottom">8.5dp</dimen>
     <dimen name="edit_text_drawable_padding">8dp</dimen>
+    <!--activity_search список треков-->
     <dimen name="search_text_size_trackName">16dp</dimen>
     <dimen name="search_text_size_artist">11dp</dimen>
     <dimen name="search_text_size_duration">11dp</dimen>
+    <!--activity_search плейсхолдер если поиск ничего не нашел-->
+    <dimen name="search_not_result_text_size">19sp</dimen>
+    <dimen name="search_not_result_text_margin_left">24dp</dimen>
+    <dimen name="search_not_result_text_margin_right">24dp</dimen>
+    <!--activity_search плейсхолдер если сетевая ошибка-->
+    <dimen name="search_network_error_text_size">19sp</dimen>
+    <dimen name="search_network_error_text_margin_left">24dp</dimen>
+    <dimen name="search_network_error_text_margin_right">24dp</dimen>
+    <dimen name="corner_radius_retry_button">54dp</dimen>
+    <dimen name="padding_horizontal_retry_button">14dp</dimen>
+    <dimen name="padding_vertical_retry_button">8dp</dimen>
+    <dimen name="margin_start_retry_button">134dp</dimen>
+    <dimen name="margin_end_retry_button">135dp</dimen>
+    <dimen name="text_size_retry_button">14sp</dimen>
+
 
 </resources>

@@ -17,4 +17,7 @@
     <string name="error_not_app_link">Нет приложения для открытия ссылки</string>
     <string name="error_not_app_email">Нет приложения для отправки e-mail</string>
     <string name="search_track_dot"> • </string>
+    <string name="search_track_not_result">Ничего не нашлось</string>
+    <string name="search_track_network_error">Проблемы со связью \n\nЗагрузка не удалась. Проверьте подключение к интернету</string>
+    <string name="search_retry_button_text">Обновить</string>
 </resources>

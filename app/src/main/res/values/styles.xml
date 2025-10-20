@@ -101,6 +101,8 @@
         <item name="android:drawablePadding">@dimen/edit_text_drawable_padding</item>
         <item name="android:textCursorDrawable">@drawable/edittext_cursor</item>
         <item name="android:layout_marginBottom">@dimen/search_field_margin_bottom</item>
+        <item name="android:imeOptions">actionSearch</item>
+        <item name="android:singleLine">true</item>
     </style>
 
     <style name="SearchTrackName">
@@ -127,6 +129,41 @@
 
     <style name="SearchTrackChevron">
         <item name="android:src">@drawable/ic_arrow_right</item>
+    </style>
+
+    <style name="SearchNotResultText">
+        <item name="android:text">@string/search_track_not_result</item>
+        <item name="android:textSize">@dimen/search_not_result_text_size</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textColor">?attr/colorSurface</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_marginLeft">@dimen/search_not_result_text_margin_left</item>
+        <item name="android:layout_marginRight">@dimen/search_not_result_text_margin_right</item>
+    </style>
+
+    <style name="SearchNetworkErrorText">
+        <item name="android:text">@string/search_track_network_error</item>
+        <item name="android:textSize">@dimen/search_network_error_text_size</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textColor">?attr/colorSurface</item>
+        <item name="android:gravity">center</item>
+        <item name="android:layout_marginLeft">@dimen/search_network_error_text_margin_left</item>
+        <item name="android:layout_marginRight">@dimen/search_network_error_text_margin_right</item>
+    </style>
+
+    <style name="SearchRetryButton" parent="Widget.MaterialComponents.Button">
+        <item name="cornerRadius">@dimen/corner_radius_retry_button</item>
+        <item name="backgroundTint">?attr/colorSurface</item>
+        <item name="android:textColor">?attr/colorPrimary</item>
+        <item name="rippleColor">@color/gray</item>
+        <item name="android:paddingHorizontal">@dimen/padding_horizontal_retry_button</item>
+        <item name="android:paddingVertical">@dimen/padding_vertical_retry_button</item>
+        <item name="android:layout_marginStart">@dimen/margin_start_retry_button</item>
+        <item name="android:layout_marginEnd">@dimen/margin_end_retry_button</item>
+        <item name="android:text">@string/search_retry_button_text</item>
+        <item name="android:textSize">@dimen/text_size_retry_button</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textAllCaps">false</item>
     </style>
 
 </resources>
