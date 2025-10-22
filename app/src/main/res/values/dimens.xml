@@ -44,6 +44,15 @@
     <dimen name="margin_start_retry_button">134dp</dimen>
     <dimen name="margin_end_retry_button">135dp</dimen>
     <dimen name="text_size_retry_button">14sp</dimen>
+    <!--activity_search история поиска-->
+    <dimen name="search_history_title_text_size">19sp</dimen>
+    <dimen name="corner_radius_clear_history_button">54dp</dimen>
+    <dimen name="margin_start_clear_history_button">106dp</dimen>
+    <dimen name="margin_end_clear_history_button">106dp</dimen>
+    <dimen name="padding_horizontal_clear_history_button">14dp</dimen>
+    <dimen name="padding_vertical_clear_history_button">8dp</dimen>
+    <dimen name="search_history_clear_button_text_size">14sp</dimen>
+
 
 
 </resources>

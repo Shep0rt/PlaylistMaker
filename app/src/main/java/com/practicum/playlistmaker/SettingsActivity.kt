@@ -10,11 +10,18 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
-import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.textview.MaterialTextView
 import androidx.core.net.toUri
+import com.google.android.material.appbar.MaterialToolbar
+import com.google.android.material.switchmaterial.SwitchMaterial
 
 class SettingsActivity : AppCompatActivity() {
+    private lateinit var toolbar : MaterialToolbar
+    private lateinit var shareTextView: View
+    private lateinit var supportTextView: View
+    private lateinit var userAgreementTextView: View
+    private lateinit var themeSwitcher: SwitchMaterial
+    private val app by lazy { applicationContext as App }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
@@ -28,14 +35,23 @@ class SettingsActivity : AppCompatActivity() {
             insets
         }
 
-        val toolbar = findViewById<MaterialToolbar>(R.id.settings_toolbar)
-        val shareTextView = findViewById<MaterialTextView>(R.id.share_text)
-        val supportTextView = findViewById<MaterialTextView>(R.id.support)
-        val userAgreementTextView = findViewById<MaterialTextView>(R.id.user_agreement)
+        toolbar = findViewById(R.id.settings_toolbar)
+        shareTextView = findViewById(R.id.share_text)
+        supportTextView = findViewById(R.id.support)
+        userAgreementTextView = findViewById(R.id.user_agreement)
+        themeSwitcher = findViewById(R.id.theme_switch)
+
+        //Синхронизируем UI свитчер с значением ищ SharedPreferences
+        themeSwitcher.isChecked = app.themeRepository.isDarkThemeEnabled()
 
         //Действия при клике на кнопку "Назад" внутри раздела "Настройки"
         toolbar.setNavigationOnClickListener {
             finish()
+        }
+
+        //Действия при клике на свитчер темы
+        themeSwitcher.setOnCheckedChangeListener { switcher, checked ->
+            app.switchTheme(checked)
         }
 
         //Действия при клике на кнопку "Поделится приложением" внутри раздела "Настройки"
