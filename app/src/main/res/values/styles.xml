@@ -165,5 +165,29 @@
         <item name="android:fontFamily">@font/ys_display_medium</item>
         <item name="android:textAllCaps">false</item>
     </style>
+    
+    <style name="SearchHistoryTitle">
+        <item name="android:text">@string/you_searched</item>
+        <item name="android:textSize">@dimen/search_history_title_text_size</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textColor">?attr/colorSurface</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="СlearHistoryButton" parent="Widget.MaterialComponents.Button">
+        <item name="cornerRadius">@dimen/corner_radius_clear_history_button</item>
+        <item name="backgroundTint">?attr/colorSurface</item>
+        <item name="android:textColor">?attr/colorPrimary</item>
+        <item name="rippleColor">@color/gray</item>
+        <item name="android:paddingHorizontal">@dimen/padding_horizontal_clear_history_button</item>
+        <item name="android:paddingVertical">@dimen/padding_vertical_clear_history_button</item>
+        <item name="android:layout_marginStart">@dimen/margin_start_clear_history_button</item>
+        <item name="android:layout_marginEnd">@dimen/margin_end_clear_history_button</item>
+        <item name="android:text">@string/clear_history</item>
+        <item name="android:textSize">@dimen/search_history_clear_button_text_size</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:gravity">center</item>
+    </style>
 
 </resources>

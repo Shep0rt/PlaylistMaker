@@ -20,7 +20,7 @@ class TracksViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
     fun bind(model: Track) {
         trackName.text = model.trackName
         artistName.text = model.artistName
-        trackTime.text = model.trackTime
+        trackTime.text = formatMs(model.trackTime)
         Glide.with(itemView)
             .load(model.artworkUrl100)
             .transform(
@@ -36,5 +36,13 @@ class TracksViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
             .placeholder(R.drawable.ic_music_placeholder)
             .error(R.drawable.ic_music_placeholder)
             .into(artworkUrl100)
+    }
+
+    //Получем строку с нужным форматом времени
+    private fun formatMs(ms: Long): String {
+        val totalSec = ms / 1000
+        val mm = totalSec / 60
+        val ss = totalSec % 60
+        return "%d:%02d".format(mm, ss)
     }
 }

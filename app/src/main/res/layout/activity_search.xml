@@ -20,7 +20,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="8dp"
-        android:layout_marginBottom="32dp">
+        android:layout_marginBottom="42dp">
 
         <EditText
             android:id="@+id/search_edit_text"
@@ -60,7 +60,7 @@
             android:layout_height="match_parent"
             android:visibility="gone"
             app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-            tools:listitem="@layout/item_track" />
+            tools:listitem="@layout/item_track"/>
 
         <include
             layout="@layout/search_not_result_placeholder"
@@ -69,6 +69,12 @@
         <include
             layout="@layout/search_network_error_placeholder"
             android:id="@+id/network_error_placeholder" />
+
+        <include
+            layout="@layout/search_history"
+            android:id="@+id/search_history"
+            />
+
 
     </FrameLayout>
 

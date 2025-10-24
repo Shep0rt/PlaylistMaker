@@ -1,3 +1,3 @@
 package com.practicum.playlistmaker.model
 
-data class Track(val trackName: String, val artistName: String, val trackTime: String, val artworkUrl100: String)
+data class Track(val id: Long, val trackName: String, val artistName: String, val trackTime: Long, val artworkUrl100: String)
