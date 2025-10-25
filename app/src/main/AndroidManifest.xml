@@ -2,10 +2,33 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+
+            <data android:scheme="mailto" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+
+            <data android:mimeType="text/plain" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+
+            <data android:scheme="http" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+
+            <data android:scheme="https" />
+        </intent>
+    </queries>
 
     <application
-        android:name="com.practicum.playlistmaker.App"
+        android:name=".App"
         android:allowBackup="true"
         android:dataExtractionRules="@xml/data_extraction_rules"
         android:fullBackupContent="@xml/backup_rules"
@@ -15,17 +38,21 @@
         android:supportsRtl="true"
         tools:targetApi="31">
         <activity
+            android:name=".ui.player.PlayerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.PlaylistMaker.Search" />
+        <activity
             android:name=".MediaLibraryActivity"
             android:exported="false"
-            android:theme="@style/Base.Theme.PlaylistMaker"/>
+            android:theme="@style/Base.Theme.PlaylistMaker" />
         <activity
             android:name=".ui.search.SearchActivity"
             android:exported="false"
-            android:theme="@style/Theme.PlaylistMaker.Search"/>
+            android:theme="@style/Theme.PlaylistMaker.Search" />
         <activity
             android:name=".SettingsActivity"
             android:exported="false"
-            android:theme="@style/Theme.PlaylistMaker.Settings"/>
+            android:theme="@style/Theme.PlaylistMaker.Settings" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
@@ -38,22 +65,4 @@
         </activity>
     </application>
 
-    <queries>
-        <intent>
-            <action android:name="android.intent.action.SENDTO" />
-            <data android:scheme="mailto" />
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.SEND" />
-            <data android:mimeType="text/plain" />
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="http" />
-        </intent>
-        <intent>
-            <action android:name="android.intent.action.VIEW" />
-            <data android:scheme="https" />
-        </intent>
-    </queries>
 </manifest>

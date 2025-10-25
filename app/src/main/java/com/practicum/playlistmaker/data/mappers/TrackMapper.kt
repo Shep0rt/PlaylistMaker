@@ -11,7 +11,11 @@ object TrackMapper {
             trackName = track.trackName.orEmpty(),
             artistName = track.artistName.orEmpty(),
             trackTime = track.trackTimeMillis ?: 0L,
-            artworkUrl100 = track.artworkUrl100.orEmpty()
+            artworkUrl100 = track.artworkUrl100.orEmpty(),
+            collectionName = track.collectionName,
+            releaseDate = track.releaseDate,
+            primaryGenreName = track.primaryGenreName,
+            country = track.country
         )
     }
 
