@@ -23,6 +23,7 @@ import com.practicum.playlistmaker.data.mappers.TrackMapper
 import com.practicum.playlistmaker.data.network.ITunesApi
 import com.practicum.playlistmaker.data.network.TrackListResponseDto
 import com.practicum.playlistmaker.model.Track
+import com.practicum.playlistmaker.ui.player.PlayerActivity
 import com.practicum.playlistmaker.util.Constants
 import retrofit2.Call
 import retrofit2.Callback
@@ -92,10 +93,13 @@ class SearchActivity : AppCompatActivity() {
 
         searchAdapter = TrackAdapter(emptyList()) { clickedTrack ->
             historyStorage.add(clickedTrack)
+            startActivity(PlayerActivity.createIntent(this, clickedTrack))
         }
         searchRecycler.adapter = searchAdapter
 
-        historyAdapter = TrackAdapter(emptyList(), null)
+        historyAdapter = TrackAdapter(emptyList()) { clickedTrack ->
+            startActivity(PlayerActivity.createIntent(this, clickedTrack))
+        }
         historyRecycler.adapter = historyAdapter
 
         //Действия при клике на кнопку "Назад" внутри раздела "Поиск"
