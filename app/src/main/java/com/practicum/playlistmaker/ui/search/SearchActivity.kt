@@ -2,6 +2,8 @@ package com.practicum.playlistmaker.ui.search
 
 import android.content.SharedPreferences
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.text.Editable
 import android.text.TextWatcher
 import android.view.View
@@ -49,6 +51,15 @@ class SearchActivity : AppCompatActivity() {
     private lateinit var historyRecycler: RecyclerView
     private lateinit var historyAdapter: TrackAdapter
     private lateinit var clearSearchHistoryButton: View
+    private lateinit var searchProgressBar: View
+    private var isClickAllowed = true
+    private val handler = Handler(Looper.getMainLooper())
+    private val searchRunnable = Runnable {
+        val query = searchEditText.text.toString().trim()
+        if (query.isNotEmpty()) {
+            searchTracks(query)
+        }
+    }
 
 
     private val retrofit = Retrofit.Builder()
@@ -84,6 +95,7 @@ class SearchActivity : AppCompatActivity() {
         searchHistory = findViewById(R.id.search_history)
         historyRecycler = searchHistory.findViewById(R.id.historyRecycler)
         clearSearchHistoryButton = searchHistory.findViewById(R.id.clearHistoryButton)
+        searchProgressBar = findViewById(R.id.searchProgressBar)
         historyStorage = TracksHistoryStorage(this)
 
         searchRecycler.visibility = View.GONE
@@ -92,13 +104,17 @@ class SearchActivity : AppCompatActivity() {
         searchHistory.visibility = View.GONE
 
         searchAdapter = TrackAdapter(emptyList()) { clickedTrack ->
-            historyStorage.add(clickedTrack)
-            startActivity(PlayerActivity.createIntent(this, clickedTrack))
+            if (clickDebounce()) {
+                historyStorage.add(clickedTrack)
+                startActivity(PlayerActivity.createIntent(this, clickedTrack))
+            }
         }
         searchRecycler.adapter = searchAdapter
 
         historyAdapter = TrackAdapter(emptyList()) { clickedTrack ->
-            startActivity(PlayerActivity.createIntent(this, clickedTrack))
+            if (clickDebounce()) {
+                startActivity(PlayerActivity.createIntent(this, clickedTrack))
+            }
         }
         historyRecycler.adapter = historyAdapter
 
@@ -117,9 +133,12 @@ class SearchActivity : AppCompatActivity() {
 
             searchEditText.clearFocus()
 
+            handler.removeCallbacks(searchRunnable)
+
             searchRecycler.visibility = View.GONE
             networkErrorPlaceholder.visibility = View.GONE
             searchNotResultPlaceholder.visibility = View.GONE
+            searchProgressBar.visibility = View.GONE
             tryShowHistory()
         }
 
@@ -129,10 +148,16 @@ class SearchActivity : AppCompatActivity() {
 
             override fun onTextChanged(s: CharSequence?, start: Int, before: Int, count: Int) {
                 clearButton.isVisible = !s.isNullOrEmpty()
+                handler.removeCallbacks(searchRunnable)
 
                 if (s.isNullOrBlank()) {
+                    showHistory(true)
+                    searchRecycler.visibility = View.GONE
+                    networkErrorPlaceholder.visibility = View.GONE
+                    searchNotResultPlaceholder.visibility = View.GONE
                     tryShowHistory()
                 } else {
+                    handler.postDelayed(searchRunnable, SEARCH_DEBOUNCE_DELAY)
                     showHistory(false)
                 }
             }
@@ -154,6 +179,7 @@ class SearchActivity : AppCompatActivity() {
         searchEditText.setOnEditorActionListener { _, actionId, _ ->
             if (actionId == EditorInfo.IME_ACTION_SEARCH) {
                 val query = searchEditText.text.toString().trim()
+                handler.removeCallbacks(searchRunnable)
                 if (query.isNotEmpty()) searchTracks(query)
                 val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
                 imm.hideSoftInputFromWindow(searchEditText.windowToken, 0)
@@ -165,6 +191,7 @@ class SearchActivity : AppCompatActivity() {
         //Действие при клике на кнопку "Обновить" на networkErrorPlaceholder
         retrySearchButton.setOnClickListener {
             lastFailedRequest?.let { query ->
+                handler.removeCallbacks(searchRunnable)
                 networkErrorPlaceholder.visibility = View.GONE
                 searchTracks(query)
             }
@@ -190,6 +217,12 @@ class SearchActivity : AppCompatActivity() {
         currentRequest = text
         lastFailedRequest = null
 
+        setLoading(true)
+        showHistory(false)
+        searchRecycler.visibility = View.GONE
+        searchNotResultPlaceholder.visibility = View.GONE
+        networkErrorPlaceholder.visibility = View.GONE
+
         iTunesApi.searchTracks(text = text)
             .enqueue(object : Callback<TrackListResponseDto> {
                 override fun onResponse(
@@ -207,6 +240,7 @@ class SearchActivity : AppCompatActivity() {
     
     //Разбираем ответ от iTunes API
     private fun handleResponse(response: retrofit2.Response<TrackListResponseDto>) {
+        setLoading(false)
         if (response.isSuccessful) {
             val tracksResponse = response.body()?.results.orEmpty()
             val tracks = TrackMapper.mapList(tracksResponse)
@@ -222,8 +256,8 @@ class SearchActivity : AppCompatActivity() {
         }
     }
 
-    //Записываем ошибку в лог если произошла сетевая ошибка при обращении в iTunes API
     private fun handleFailure(t: Throwable) {
+        setLoading(false)
         showNetworkError()
         lastFailedRequest = currentRequest
     }
@@ -274,6 +308,19 @@ class SearchActivity : AppCompatActivity() {
         } else View.GONE
     }
 
+    private fun setLoading(loading: Boolean) {
+        searchProgressBar.visibility = if (loading) View.VISIBLE else View.GONE
+    }
+
+    private fun clickDebounce() : Boolean {
+        val current = isClickAllowed
+        if (isClickAllowed) {
+            isClickAllowed = false
+            handler.postDelayed({ isClickAllowed = true }, CLICK_DEBOUNCE_DELAY)
+        }
+        return current
+    }
+
     //Сохраняем внесенные изменения пользователем, на данной activity
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
@@ -288,6 +335,7 @@ class SearchActivity : AppCompatActivity() {
 
     override fun onDestroy() {
         super.onDestroy()
+        handler.removeCallbacks(searchRunnable)
         historyStorage.getPrefs()
             .unregisterOnSharedPreferenceChangeListener(prefsHistoryListener)
     }
@@ -295,5 +343,7 @@ class SearchActivity : AppCompatActivity() {
     companion object {
         const val SEARCH_TEXT = "SEARCH_TEXT"
         const val SEARCH_TEXT_DEF = ""
+        private const val SEARCH_DEBOUNCE_DELAY = 2000L
+        private const val CLICK_DEBOUNCE_DELAY = 1000L
     }
 }

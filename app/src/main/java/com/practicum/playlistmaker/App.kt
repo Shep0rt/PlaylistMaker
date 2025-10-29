@@ -16,28 +16,19 @@ class App : Application() {
 
         themeRepository = SharedPrefsThemeRepository(this)
         val isDarkThemeEnabled = themeRepository.isDarkThemeEnabled()
-
-        AppCompatDelegate.setDefaultNightMode(
-            if (isDarkThemeEnabled) {
-                AppCompatDelegate.MODE_NIGHT_YES
-            } else {
-                AppCompatDelegate.MODE_NIGHT_NO
-            }
-        )
+        applyTheme(isDarkThemeEnabled)
     }
 
     //Изменение тем
     fun switchTheme(darkThemeEnabled: Boolean) {
         themeRepository.setDarkThemeEnabled(darkThemeEnabled)
-        AppCompatDelegate.setDefaultNightMode(
-            if (darkThemeEnabled) {
-                AppCompatDelegate.MODE_NIGHT_YES
-            }
-            else {
-                AppCompatDelegate.MODE_NIGHT_NO
-            }
-        )
+        applyTheme(darkThemeEnabled)
     }
 
-
+    private fun applyTheme(isDark: Boolean) {
+        AppCompatDelegate.setDefaultNightMode(
+            if (isDark) AppCompatDelegate.MODE_NIGHT_YES
+            else AppCompatDelegate.MODE_NIGHT_NO
+        )
+    }
 }
