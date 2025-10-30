@@ -2,8 +2,10 @@ package com.practicum.playlistmaker.ui.player
 
 import android.content.Context
 import android.content.Intent
+import android.media.MediaPlayer
 import android.os.Build
 import android.os.Bundle
+import android.os.Looper
 import android.util.TypedValue
 import android.widget.ImageButton
 import android.widget.ImageView
@@ -19,6 +21,7 @@ import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.google.android.material.appbar.MaterialToolbar
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.model.Track
+import android.os.Handler
 
 class PlayerActivity : AppCompatActivity() {
 
@@ -29,6 +32,7 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var addPlaylist: ImageButton
     private lateinit var play: ImageButton
     private lateinit var like: ImageButton
+    private lateinit var durationTrack: TextView
 
     private  lateinit var tvDurationLabel: TextView
     private lateinit var tvDurationValue: TextView
@@ -40,6 +44,18 @@ class PlayerActivity : AppCompatActivity() {
     private lateinit var tvGenreValue: TextView
     private lateinit var tvCountryLabel: TextView
     private lateinit var tvCountryValue: TextView
+    private lateinit var mediaPlayer: MediaPlayer
+    private var playerState = STATE_DEFAULT
+    private val handler = Handler(Looper.getMainLooper())
+
+    private val trackDurationRunnable = object : Runnable {
+        override fun run() {
+            if (playerState == STATE_PLAYING) {
+                durationTrack.text = formatDuration(mediaPlayer.currentPosition.toLong())
+                handler.postDelayed(this, DELAY_REFRESH_DURATION_TRACK)
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -59,6 +75,7 @@ class PlayerActivity : AppCompatActivity() {
         addPlaylist = findViewById(R.id.addPlaylist)
         play = findViewById(R.id.play)
         like = findViewById(R.id.like)
+        durationTrack = findViewById(R.id.durationTrack)
 
         tvDurationLabel = findViewById(R.id.descriptionDurationText)
         tvDurationValue = findViewById(R.id.descriptionDurationValue)
@@ -71,16 +88,85 @@ class PlayerActivity : AppCompatActivity() {
         tvCountryLabel = findViewById(R.id.descriptionCountryText)
         tvCountryValue = findViewById(R.id.descriptionCountryValue)
 
-        //Действие при нажатии кнопки назад на toolbar
-        toolbar.setNavigationOnClickListener { finish() }
+        mediaPlayer = MediaPlayer()
 
         //Получаем трек и присваиваем значения во Views
         val track = getParcelableExtraCompat<Track>(EXTRA_TRACK)
-        if (track == null) {
+        if (track == null || track.previewUrl.isNullOrBlank()) {
             finish()
             return
         }
         bindTrack(track)
+        preparePlayer(track.previewUrl)
+
+        //Действие при нажатии кнопки назад на toolbar
+        toolbar.setNavigationOnClickListener { finish() }
+
+        //Действие при нажатии на кнопку play
+        play.setOnClickListener {
+            playbackControl()
+        }
+    }
+
+    override fun onPause() {
+        super.onPause()
+        pausePlayer()
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopUpdatingTime()
+        mediaPlayer.release()
+    }
+
+    private fun preparePlayer(url: String) {
+        play.isEnabled = false
+        mediaPlayer.reset()
+        mediaPlayer.setDataSource(url)
+        mediaPlayer.prepareAsync()
+        mediaPlayer.setOnPreparedListener {
+            play.isEnabled = true
+            playerState = STATE_PREPARED
+        }
+        mediaPlayer.setOnCompletionListener {
+            play.setImageResource(R.drawable.ic_button_play100)
+            playerState = STATE_PREPARED
+            stopUpdatingTime()
+            durationTrack.text = DEFAULT_DURATION_TRACK
+        }
+    }
+
+    private fun startPlayer() {
+        mediaPlayer.start()
+        play.setImageResource(R.drawable.ic_button_pause100)
+        playerState = STATE_PLAYING
+        startUpdatingTime()
+    }
+
+    private fun pausePlayer() {
+        mediaPlayer.pause()
+        play.setImageResource(R.drawable.ic_button_play100)
+        playerState = STATE_PAUSED
+        stopUpdatingTime()
+    }
+
+    private fun playbackControl() {
+        when(playerState) {
+            STATE_PLAYING -> {
+                pausePlayer()
+            }
+            STATE_PREPARED, STATE_PAUSED -> {
+                startPlayer()
+            }
+        }
+    }
+
+    private fun startUpdatingTime() {
+        handler.post(trackDurationRunnable)
+    }
+
+    private fun stopUpdatingTime() {
+        handler.removeCallbacks(trackDurationRunnable)
     }
 
     private fun bindTrack(track: Track) {
@@ -140,6 +226,14 @@ class PlayerActivity : AppCompatActivity() {
 
     companion object {
         private const val EXTRA_TRACK = "extra_track"
+
+        private const val STATE_DEFAULT = 0
+        private const val STATE_PREPARED = 1
+        private const val STATE_PLAYING = 2
+        private const val STATE_PAUSED = 3
+
+        private const val DELAY_REFRESH_DURATION_TRACK = 300L
+        private const val DEFAULT_DURATION_TRACK = "0:00"
 
         fun createIntent(context: Context, track: Track): Intent {
             return Intent(context, PlayerActivity::class.java).apply {
