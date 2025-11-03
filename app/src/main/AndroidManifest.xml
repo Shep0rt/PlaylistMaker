@@ -4,6 +4,27 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
 
+    <queries>
+        <intent>
+            <action android:name="android.intent.action.SENDTO" />
+            <data android:scheme="mailto" />
+        </intent>
+
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="http" />
+        </intent>
+        <intent>
+            <action android:name="android.intent.action.VIEW" />
+            <data android:scheme="https" />
+        </intent>
+
+        <intent>
+            <action android:name="android.intent.action.SEND" />
+            <data android:mimeType="text/plain" />
+        </intent>
+    </queries>
+
     <application
         android:name=".App"
         android:allowBackup="true"
@@ -15,19 +36,19 @@
         android:supportsRtl="true"
         tools:targetApi="31">
         <activity
-            android:name=".ui.player.PlayerActivity"
+            android:name=".presentation.player.PlayerActivity"
             android:exported="false"
             android:theme="@style/Theme.PlaylistMaker.Search" />
         <activity
-            android:name=".MediaLibraryActivity"
+            android:name=".presentation.media.MediaLibraryActivity"
             android:exported="false"
             android:theme="@style/Base.Theme.PlaylistMaker" />
         <activity
-            android:name=".ui.search.SearchActivity"
+            android:name=".presentation.search.SearchActivity"
             android:exported="false"
             android:theme="@style/Theme.PlaylistMaker.Search" />
         <activity
-            android:name=".SettingsActivity"
+            android:name=".presentation.settings.SettingsActivity"
             android:exported="false"
             android:theme="@style/Theme.PlaylistMaker.Settings" />
         <activity
