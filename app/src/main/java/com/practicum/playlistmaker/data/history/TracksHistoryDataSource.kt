@@ -1,8 +1,8 @@
-package com.practicum.playlistmaker.domain.repository
+package com.practicum.playlistmaker.data.history
 
 import com.practicum.playlistmaker.domain.models.Track
 
-interface TracksHistoryRepository {
+interface TracksHistoryDataSource {
     fun get(): List<Track>
     fun add(track: Track)
     fun clear()

@@ -1,18 +1,17 @@
-package com.practicum.playlistmaker.data
+package com.practicum.playlistmaker.data.history
 
 import android.content.Context
 import androidx.core.content.edit
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import com.practicum.playlistmaker.domain.models.Track
-import com.practicum.playlistmaker.domain.repository.TracksHistoryRepository
 import com.practicum.playlistmaker.util.Constants
 
-class TrackHistoryRepositoryImpl(
+class TrackHistorySharedPrefs(
     context: Context,
     private val gson: Gson = Gson(),
     private val maxSize: Int = Constants.HISTORY_MAX_SIZE
-) : TracksHistoryRepository {
+) : TracksHistoryDataSource {
 
     private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 

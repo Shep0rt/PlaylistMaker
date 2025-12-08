@@ -3,7 +3,6 @@ package com.practicum.playlistmaker.presentation.settings
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
@@ -12,65 +11,86 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
-import com.google.android.material.appbar.MaterialToolbar
-import com.google.android.material.switchmaterial.SwitchMaterial
-import com.practicum.playlistmaker.Creator
+import androidx.lifecycle.ViewModelProvider
+import com.practicum.playlistmaker.creator.Creator
 import com.practicum.playlistmaker.R
+import com.practicum.playlistmaker.databinding.ActivitySettingsBinding
 
 class SettingsActivity : AppCompatActivity() {
-    private lateinit var toolbar : MaterialToolbar
-    private lateinit var shareTextView: View
-    private lateinit var supportTextView: View
-    private lateinit var userAgreementTextView: View
-    private lateinit var themeSwitcher: SwitchMaterial
+
+    private lateinit var binding: ActivitySettingsBinding
+    private lateinit var viewModel: SettingsViewModel
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_settings)
+        binding = ActivitySettingsBinding.inflate(layoutInflater)
+        setContentView(binding.root)
 
-        val rootView = findViewById<View>(R.id.root_layout)
-        ViewCompat.setOnApplyWindowInsetsListener(rootView) { view, insets ->
+        applyWindowInsets()
+        initViewModel()
+        setupToolbar()
+        initThemeSwitcher()
+        setupThemeSwitchListener()
+        setupShareListener()
+        setupSupportListener()
+        setupAgreementListener()
+    }
+
+    private fun applyWindowInsets() {
+        ViewCompat.setOnApplyWindowInsetsListener(binding.rootLayout) { view, insets ->
             val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
             view.updatePadding(top = statusBarInsets.top)
             insets
         }
+    }
 
-        toolbar = findViewById(R.id.settings_toolbar)
-        shareTextView = findViewById(R.id.share_text)
-        supportTextView = findViewById(R.id.support)
-        userAgreementTextView = findViewById(R.id.user_agreement)
-        themeSwitcher = findViewById(R.id.theme_switch)
+    private fun initViewModel() {
+        viewModel = ViewModelProvider(
+            this,
+            SettingsViewModelFactory(
+                Creator.getThemeInteractor,
+                Creator.setThemeInteractor)
+        ) [SettingsViewModel::class.java]
+    }
 
-        //Синхронизируем UI свитчер с значением из SharedPreferences
-        themeSwitcher.isChecked = Creator.getThemeInteractor.execute()
-
+    private fun setupToolbar() {
         //Действия при клике на кнопку "Назад" внутри раздела "Настройки"
-        toolbar.setNavigationOnClickListener {
-            finish()
-        }
+        binding.settingsToolbar.setNavigationOnClickListener { finish() }
+    }
 
+    private fun initThemeSwitcher() {
+        // Инициируем UI текущим значением темы
+        binding.themeSwitch.isChecked = viewModel.isDarkMode()
+    }
+
+    private fun setupThemeSwitchListener() {
         //Действия при клике на свитчер темы
-        themeSwitcher.setOnCheckedChangeListener { _, checked ->
-            Creator.setThemeInteractor.execute(checked)
+        binding.themeSwitch.setOnCheckedChangeListener { _, checked ->
+            viewModel.setDarkMode(checked)
+
             AppCompatDelegate.setDefaultNightMode(
                 if (checked) AppCompatDelegate.MODE_NIGHT_YES
                 else AppCompatDelegate.MODE_NIGHT_NO
             )
         }
+    }
 
+    private fun setupShareListener() {
         //Действия при клике на кнопку "Поделится приложением" внутри раздела "Настройки"
-        shareTextView.setOnClickListener {
+        binding.shareText.setOnClickListener {
             val intent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
                 putExtra(Intent.EXTRA_TEXT, getString(R.string.share_app_text))
             }
             startActivity(Intent.createChooser(intent, getString(R.string.share_app_title)))
         }
+    }
 
+    private fun setupSupportListener() {
         //Действия при клике на кнопку "Написать в поддержку" внутри раздела "Настройки"
-        supportTextView.setOnClickListener {
+        binding.support.setOnClickListener {
             val email = "mailto:" + Uri.encode(getString(R.string.email_address)) +
                     "?subject=" + Uri.encode(getString(R.string.support_subject)) +
                     "&body=" + Uri.encode(getString(R.string.support_body))
@@ -84,9 +104,11 @@ class SettingsActivity : AppCompatActivity() {
                 Toast.makeText(this, getString(R.string.error_not_app_email), Toast.LENGTH_SHORT).show()
             }
         }
+    }
 
+    private fun setupAgreementListener() {
         //Действия при клике на кнопку "Пользовательское соглашение" внутри раздела "Настройки"
-        userAgreementTextView.setOnClickListener {
+        binding.userAgreement.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW, getString(R.string.practicum_offer).toUri())
             if (intent.resolveActivity(packageManager) != null) {
                 startActivity(intent)
