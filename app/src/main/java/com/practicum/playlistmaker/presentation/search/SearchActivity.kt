@@ -10,16 +10,15 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
-import androidx.lifecycle.ViewModelProvider
-import com.practicum.playlistmaker.creator.Creator
 import com.practicum.playlistmaker.databinding.ActivitySearchBinding
 import com.practicum.playlistmaker.presentation.models.TrackUiDto
 import com.practicum.playlistmaker.presentation.player.PlayerActivity
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySearchBinding
-    private lateinit var viewModel: SearchViewModel
+    private val viewModel: SearchViewModel by viewModel()
 
     private lateinit var searchAdapter: TrackAdapter
     private lateinit var historyAdapter: TrackAdapter
@@ -32,20 +31,8 @@ class SearchActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         applyInsets()
-        initViewModel()
         setupAdapters()
         setupListeners()
-    }
-
-    private fun initViewModel() {
-        val factory = SearchViewModelFactory(
-            searchTracksInteractor = Creator.searchTracksInteractor,
-            getHistoryInteractor = Creator.getHistoryInteractor,
-            saveToHistoryInteractor = Creator.addToHistoryInteractor,
-            clearHistoryInteractor = Creator.clearHistoryInteractor
-        )
-
-        viewModel = ViewModelProvider(this, factory)[SearchViewModel::class.java]
 
         viewModel.searchState.observe(this) { state -> renderState(state) }
     }

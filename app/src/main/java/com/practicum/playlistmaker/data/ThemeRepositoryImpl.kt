@@ -1,15 +1,12 @@
 package com.practicum.playlistmaker.data
 
-import android.content.Context
-import android.content.Context.MODE_PRIVATE
+import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.practicum.playlistmaker.domain.repository.ThemeRepository
 
 class ThemeRepositoryImpl(
-    context: Context
+    private val prefs: SharedPreferences
 ) : ThemeRepository {
-
-    private val prefs = context.getSharedPreferences(USER_SETTINGS_PREFERENCES, MODE_PRIVATE)
 
     //Получить текущее значение настройки, если пусто то записать false и вернуть
     override fun isDarkThemeEnabled(): Boolean {
@@ -21,7 +18,6 @@ class ThemeRepositoryImpl(
     }
 
     companion object {
-        const val USER_SETTINGS_PREFERENCES = "user_settings_preferences"
         const val EDIT_THEME_KEY = "key_for_theme"
     }
 }
