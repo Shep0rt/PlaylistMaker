@@ -51,18 +51,15 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun setupObservers() {
-        viewModel.observePlayerState().observe(this) { state ->
-            binding.play.isEnabled = state != PlayerState.Default
+        viewModel.uiState.observe(this) { state ->
+            binding.play.isEnabled = state.playerState != PlayerState.Default
             binding.play.setImageResource(
-                if (state == PlayerState.Playing)
+                if (state.playerState == PlayerState.Playing)
                     R.drawable.ic_button_pause100
                 else
                     R.drawable.ic_button_play100
             )
-        }
-
-        viewModel.observeProgressTime().observe(this) {
-            binding.durationTrack.text = it
+            binding.durationTrack.text = state.progress
         }
     }
 

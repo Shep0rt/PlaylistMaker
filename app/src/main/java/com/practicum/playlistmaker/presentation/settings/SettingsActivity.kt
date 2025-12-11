@@ -29,7 +29,7 @@ class SettingsActivity : AppCompatActivity() {
 
         applyWindowInsets()
         setupToolbar()
-        initThemeSwitcher()
+        setupThemeObserver()
         setupThemeSwitchListener()
         setupShareListener()
         setupSupportListener()
@@ -49,20 +49,24 @@ class SettingsActivity : AppCompatActivity() {
         binding.settingsToolbar.setNavigationOnClickListener { finish() }
     }
 
-    private fun initThemeSwitcher() {
+    private fun setupThemeObserver() {
         // Инициируем UI текущим значением темы
-        binding.themeSwitch.isChecked = viewModel.isDarkMode()
+        viewModel.darkModeEnabled.observe(this) { isDark ->
+            if (binding.themeSwitch.isChecked != isDark) {
+                binding.themeSwitch.isChecked = isDark
+            }
+
+            AppCompatDelegate.setDefaultNightMode(
+                if (isDark) AppCompatDelegate.MODE_NIGHT_YES
+                else AppCompatDelegate.MODE_NIGHT_NO
+            )
+        }
     }
 
     private fun setupThemeSwitchListener() {
         //Действия при клике на свитчер темы
         binding.themeSwitch.setOnCheckedChangeListener { _, checked ->
             viewModel.setDarkMode(checked)
-
-            AppCompatDelegate.setDefaultNightMode(
-                if (checked) AppCompatDelegate.MODE_NIGHT_YES
-                else AppCompatDelegate.MODE_NIGHT_NO
-            )
         }
     }
 
