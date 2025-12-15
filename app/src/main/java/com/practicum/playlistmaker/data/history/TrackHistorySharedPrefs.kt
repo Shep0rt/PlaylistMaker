@@ -1,6 +1,6 @@
 package com.practicum.playlistmaker.data.history
 
-import android.content.Context
+import android.content.SharedPreferences
 import androidx.core.content.edit
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -8,12 +8,10 @@ import com.practicum.playlistmaker.domain.models.Track
 import com.practicum.playlistmaker.util.Constants
 
 class TrackHistorySharedPrefs(
-    context: Context,
+    private val prefs: SharedPreferences,
     private val gson: Gson = Gson(),
     private val maxSize: Int = Constants.HISTORY_MAX_SIZE
 ) : TracksHistoryDataSource {
-
-    private val prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
 
     override fun get(): List<Track> {
         val json = prefs.getString(KEY_HISTORY, null) ?: return emptyList()
@@ -39,7 +37,6 @@ class TrackHistorySharedPrefs(
     }
 
     private companion object {
-        const val PREFS_NAME = "search_tracks_history"
         const val KEY_HISTORY = "search_history"
     }
 }

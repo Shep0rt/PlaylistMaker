@@ -7,30 +7,36 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import com.practicum.playlistmaker.presentation.models.OptionalField
+import com.practicum.playlistmaker.presentation.models.PlayerUiState
+import com.practicum.playlistmaker.presentation.models.TrackUiDto
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class PlayerViewModel(private val url: String) : ViewModel() {
+class PlayerViewModel(private val track: TrackUiDto) : ViewModel() {
 
-    private val playerStateLiveData = MutableLiveData<PlayerState>(PlayerState.Default)
-    fun observePlayerState(): LiveData<PlayerState> = playerStateLiveData
-
-    private val progressTimeLivaData = MutableLiveData(DEFAULT_POSITION_TRACK)
-    fun observeProgressTime(): LiveData<String> = progressTimeLivaData
+    private val state = MutableLiveData(
+        PlayerUiState(
+            playerState = PlayerState.Default,
+            progress = PlayerConstants.DEFAULT_POSITION_TRACK
+        )
+    )
+    val uiState: LiveData<PlayerUiState> = state
 
     private val mediaPlayer = MediaPlayer()
 
     private val handler = Handler(Looper.getMainLooper())
 
-    private val timerRunnable = Runnable {
-        if (playerStateLiveData.value == PlayerState.Playing){
-            startTimerUpdate()
-        }
-    }
+    private val timerRunnable = object : Runnable {
+        override fun run() {
+            val currentState = state.value ?: return
+            if (currentState.playerState != PlayerState.Playing) return
 
-    companion object {
-        private const val DELAY_REFRESH_DURATION_TRACK = 300L
-        private const val DEFAULT_POSITION_TRACK = "0:00"
+            val formatted = SimpleDateFormat("m:ss", Locale.getDefault())
+                .format(mediaPlayer.currentPosition)
+            setProgress(formatted)
+
+            handler.postDelayed(this, PlayerConstants.DELAY_REFRESH_DURATION_TRACK)
+        }
     }
 
     init {
@@ -44,7 +50,7 @@ class PlayerViewModel(private val url: String) : ViewModel() {
     }
 
     fun onPlayButtonClicked() {
-        when(playerStateLiveData.value) {
+        when(state.value?.playerState) {
             PlayerState.Playing -> pausePlayer()
             PlayerState.Prepared, PlayerState.Paused -> startPlayer()
             PlayerState.Default -> {}
@@ -54,6 +60,22 @@ class PlayerViewModel(private val url: String) : ViewModel() {
 
     fun onPause() {
         pausePlayer()
+    }
+
+    private fun updateState(transform: (PlayerUiState) -> PlayerUiState) {
+        val current = state.value ?: PlayerUiState(
+            playerState = PlayerState.Default,
+            progress = PlayerConstants.DEFAULT_POSITION_TRACK
+        )
+        state.postValue(transform(current))
+    }
+
+    private fun setPlayerState(state: PlayerState) {
+        updateState { it.copy(playerState = state) }
+    }
+
+    private fun setProgress(progress: String) {
+        updateState { it.copy(progress = progress) }
     }
 
     fun isoToYear(iso: String?): String? =
@@ -73,33 +95,37 @@ class PlayerViewModel(private val url: String) : ViewModel() {
     }
 
     private fun preparePlayer() {
-        mediaPlayer.setDataSource(url)
+        mediaPlayer.setDataSource(track.previewUrl)
         mediaPlayer.prepareAsync()
         mediaPlayer.setOnPreparedListener {
-            playerStateLiveData.postValue(PlayerState.Prepared)
+            setPlayerState(PlayerState.Prepared)
         }
         mediaPlayer.setOnCompletionListener {
+            pauseTimer()
             mediaPlayer.seekTo(0)
-            resetTimer()
-            playerStateLiveData.postValue(PlayerState.Prepared)
+            updateState {
+                it.copy(
+                    playerState = PlayerState.Prepared,
+                    progress = PlayerConstants.DEFAULT_POSITION_TRACK
+                )
+            }
         }
     }
 
     private fun startPlayer() {
         mediaPlayer.start()
-        playerStateLiveData.postValue(PlayerState.Playing)
+        setPlayerState(PlayerState.Playing)
         startTimerUpdate()
     }
 
     private fun pausePlayer() {
         pauseTimer()
         mediaPlayer.pause()
-        playerStateLiveData.postValue(PlayerState.Paused)
+        setPlayerState(PlayerState.Paused)
     }
 
     private fun startTimerUpdate() {
-        progressTimeLivaData.postValue(SimpleDateFormat("m:ss", Locale.getDefault()).format(mediaPlayer.currentPosition))
-        handler.postDelayed(timerRunnable, DELAY_REFRESH_DURATION_TRACK)
+        handler.post(timerRunnable)
     }
 
     private fun pauseTimer() {
@@ -108,6 +134,6 @@ class PlayerViewModel(private val url: String) : ViewModel() {
 
     private fun resetTimer() {
         handler.removeCallbacks(timerRunnable)
-        progressTimeLivaData.postValue(DEFAULT_POSITION_TRACK)
+        setProgress(PlayerConstants.DEFAULT_POSITION_TRACK)
     }
 }

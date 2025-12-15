@@ -11,15 +11,14 @@ import androidx.core.view.ViewCompat
 import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
-import androidx.lifecycle.ViewModelProvider
-import com.practicum.playlistmaker.creator.Creator
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.ActivitySettingsBinding
+import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SettingsActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivitySettingsBinding
-    private lateinit var viewModel: SettingsViewModel
+    private val viewModel: SettingsViewModel by viewModel()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         WindowCompat.setDecorFitsSystemWindows(window, false)
@@ -29,9 +28,8 @@ class SettingsActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         applyWindowInsets()
-        initViewModel()
         setupToolbar()
-        initThemeSwitcher()
+        setupThemeObserver()
         setupThemeSwitchListener()
         setupShareListener()
         setupSupportListener()
@@ -46,34 +44,29 @@ class SettingsActivity : AppCompatActivity() {
         }
     }
 
-    private fun initViewModel() {
-        viewModel = ViewModelProvider(
-            this,
-            SettingsViewModelFactory(
-                Creator.getThemeInteractor,
-                Creator.setThemeInteractor)
-        ) [SettingsViewModel::class.java]
-    }
-
     private fun setupToolbar() {
         //Действия при клике на кнопку "Назад" внутри раздела "Настройки"
         binding.settingsToolbar.setNavigationOnClickListener { finish() }
     }
 
-    private fun initThemeSwitcher() {
+    private fun setupThemeObserver() {
         // Инициируем UI текущим значением темы
-        binding.themeSwitch.isChecked = viewModel.isDarkMode()
+        viewModel.darkModeEnabled.observe(this) { isDark ->
+            if (binding.themeSwitch.isChecked != isDark) {
+                binding.themeSwitch.isChecked = isDark
+            }
+
+            AppCompatDelegate.setDefaultNightMode(
+                if (isDark) AppCompatDelegate.MODE_NIGHT_YES
+                else AppCompatDelegate.MODE_NIGHT_NO
+            )
+        }
     }
 
     private fun setupThemeSwitchListener() {
         //Действия при клике на свитчер темы
         binding.themeSwitch.setOnCheckedChangeListener { _, checked ->
             viewModel.setDarkMode(checked)
-
-            AppCompatDelegate.setDefaultNightMode(
-                if (checked) AppCompatDelegate.MODE_NIGHT_YES
-                else AppCompatDelegate.MODE_NIGHT_NO
-            )
         }
     }
 

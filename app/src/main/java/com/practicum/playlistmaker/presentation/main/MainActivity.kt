@@ -1,4 +1,4 @@
-package com.practicum.playlistmaker
+package com.practicum.playlistmaker.presentation.main
 
 import android.content.Intent
 import android.os.Bundle
@@ -6,9 +6,10 @@ import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.view.ViewCompat
+import androidx.core.view.WindowCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.updatePadding
-import androidx.core.view.WindowCompat
+import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.presentation.media.MediaLibraryActivity
 import com.practicum.playlistmaker.presentation.search.SearchActivity
 import com.practicum.playlistmaker.presentation.settings.SettingsActivity

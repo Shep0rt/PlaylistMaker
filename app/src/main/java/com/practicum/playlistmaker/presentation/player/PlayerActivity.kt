@@ -15,24 +15,17 @@ import com.bumptech.glide.load.resource.bitmap.FitCenter
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker.R
 import android.os.Parcelable
-import androidx.lifecycle.ViewModelProvider
 import com.practicum.playlistmaker.databinding.ActivityPlayerBinding
 import com.practicum.playlistmaker.presentation.models.TrackUiDto
+import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
 
 class PlayerActivity : AppCompatActivity() {
 
     private lateinit var binding: ActivityPlayerBinding
     private lateinit var track: TrackUiDto
-    private lateinit var viewModel: PlayerViewModel
-
-    companion object {
-        private const val EXTRA_TRACK = "extra_track"
-
-        fun createIntent(context: Context, track: TrackUiDto): Intent {
-            return Intent(context, PlayerActivity::class.java).apply {
-                putExtra(EXTRA_TRACK, track)
-            }
-        }
+    private val viewModel: PlayerViewModel by viewModel {
+        parametersOf(track)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,7 +40,6 @@ class PlayerActivity : AppCompatActivity() {
             finish()
             return
         }
-        initViewModel()
         bindTrack(track)
         setupObservers()
         setupListeners()
@@ -59,18 +51,15 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun setupObservers() {
-        viewModel.observePlayerState().observe(this) { state ->
-            binding.play.isEnabled = state != PlayerState.Default
+        viewModel.uiState.observe(this) { state ->
+            binding.play.isEnabled = state.playerState != PlayerState.Default
             binding.play.setImageResource(
-                if (state == PlayerState.Playing)
+                if (state.playerState == PlayerState.Playing)
                     R.drawable.ic_button_pause100
                 else
                     R.drawable.ic_button_play100
             )
-        }
-
-        viewModel.observeProgressTime().observe(this) {
-            binding.durationTrack.text = it
+            binding.durationTrack.text = state.progress
         }
     }
 
@@ -88,12 +77,6 @@ class PlayerActivity : AppCompatActivity() {
             v.setPadding(sys.left, sys.top, sys.right, sys.bottom)
             insets
         }
-    }
-
-    private fun initViewModel() {
-        val trackUrl = track.previewUrl ?: return
-        val factory = PlayerViewModelFactory(trackUrl)
-        viewModel = ViewModelProvider(this, factory)[PlayerViewModel::class.java]
     }
 
     private fun bindTrack(track: TrackUiDto) = with(binding) {
@@ -155,6 +138,16 @@ class PlayerActivity : AppCompatActivity() {
         } else {
             @Suppress("DEPRECATION")
             intent.getParcelableExtra(key)
+        }
+    }
+
+    companion object {
+        private const val EXTRA_TRACK = "extra_track"
+
+        fun createIntent(context: Context, track: TrackUiDto): Intent {
+            return Intent(context, PlayerActivity::class.java).apply {
+                putExtra(EXTRA_TRACK, track)
+            }
         }
     }
 }

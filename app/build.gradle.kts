@@ -52,22 +52,24 @@ dependencies {
     androidTestImplementation(libs.androidx.espresso.core)
 
     //GLIDE
-    implementation ("com.google.android.material:material:1.6.1")
-    implementation ("com.github.bumptech.glide:glide:4.14.2")
-    annotationProcessor ("com.github.bumptech.glide:compiler:4.14.2")
+    implementation(libs.material)
+    implementation(libs.glide)
+    annotationProcessor(libs.glide.compiler)
 
     //GSON
-    implementation("com.google.code.gson:gson:2.10")
+    implementation(libs.gson)
 
     //RETROFIT
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:retrofit:2.9.0")
-    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
 
     //ViewModel
-    implementation("androidx.lifecycle:lifecycle-viewmodel-ktx:2.5.1")
-    implementation("androidx.activity:activity-ktx:1.6.1")
+    implementation(libs.lifecycle.viewmodel)
+    implementation(libs.activity.ktx.legacy)
 
     //LiveData
-    implementation("androidx.lifecycle:lifecycle-livedata-ktx:2.5.1")
+    implementation(libs.lifecycle.livedata)
+
+    //Koin
+    implementation(libs.koin.android)
 }
