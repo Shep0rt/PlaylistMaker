@@ -164,6 +164,7 @@
         <item name="android:textSize">@dimen/text_size_retry_button</item>
         <item name="android:fontFamily">@font/ys_display_medium</item>
         <item name="android:textAllCaps">false</item>
+        <item name="android:letterSpacing">0</item>
     </style>
     
     <style name="SearchHistoryTitle">
@@ -230,6 +231,58 @@
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">end</item>
         <item name="android:gravity">end</item>
+    </style>
+
+    <!--activity_media_library -->
+    <style name="MediaLibraryToolbarTitleTextAppearance">
+        <item name="android:textSize">@dimen/media_library_text_size_title</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+    </style>
+
+    <style name="MediaLibraryToolbar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:background">?attr/colorPrimary</item>
+        <item name="titleTextAppearance">@style/MediaLibraryToolbarTitleTextAppearance</item>
+        <item name="titleTextColor">?attr/colorSurface</item>
+        <item name="navigationIconTint">?attr/colorSurface</item>
+    </style>
+
+    <style name="MediaLibraryTabLayoutTextAppearance">
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:textAllCaps">false</item>
+    </style>
+
+    <style name="MediaLibraryEmptyText">
+        <item name="android:textSize">@dimen/media_library_empty_size_text</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textColor">?attr/colorSurface</item>
+        <item name="android:text">@string/media_library_empty</item>
+    </style>
+
+    <style name="MediaLibraryNoPlaylistText">
+        <item name="android:textSize">@dimen/media_library_no_playlist_text</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textColor">?attr/colorSurface</item>
+        <item name="android:text">@string/media_library_no_playlist</item>
+    </style>
+
+    <style name="NewPlaylist" parent="Widget.MaterialComponents.Button">
+        <item name="android:maxLines">1</item>
+        <item name="cornerRadius">@dimen/corner_radius_retry_button</item>
+        <item name="backgroundTint">?attr/colorSurface</item>
+        <item name="android:textColor">?attr/colorPrimary</item>
+        <item name="rippleColor">@color/gray</item>
+        <item name="android:text">@string/new_playlist</item>
+        <item name="android:textSize">14sp</item>
+        <item name="android:fontFamily">@font/ys_display_medium</item>
+        <item name="android:textAllCaps">false</item>
+        <item name="android:paddingHorizontal">@dimen/padding_horizontal_new_playlist_button</item>
+        <item name="android:paddingVertical">@dimen/padding_vertical_new_playlist_button</item>
+        <item name="android:layout_marginStart">@dimen/margin_start_new_playlist_button</item>
+        <item name="android:layout_marginEnd">@dimen/margin_end_new_playlist_button</item>
+        <item name="android:letterSpacing">0</item>
     </style>
 
 </resources>

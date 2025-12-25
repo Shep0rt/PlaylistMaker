@@ -12,7 +12,7 @@ import com.practicum.playlistmaker.presentation.models.TrackUiDto
 import java.text.SimpleDateFormat
 import java.util.Locale
 
-class PlayerViewModel(private val track: TrackUiDto) : ViewModel() {
+class PlayerViewModel(private val track: TrackUiDto, private val mediaPlayer: MediaPlayer) : ViewModel() {
 
     private val state = MutableLiveData(
         PlayerUiState(
@@ -21,8 +21,6 @@ class PlayerViewModel(private val track: TrackUiDto) : ViewModel() {
         )
     )
     val uiState: LiveData<PlayerUiState> = state
-
-    private val mediaPlayer = MediaPlayer()
 
     private val handler = Handler(Looper.getMainLooper())
 

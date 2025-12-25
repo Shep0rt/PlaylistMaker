@@ -1,9 +1,12 @@
 package com.practicum.playlistmaker.di
 
+import android.media.MediaPlayer
 import com.practicum.playlistmaker.domain.interactor.history.ClearHistoryInteractor
 import com.practicum.playlistmaker.domain.interactor.history.GetHistoryInteractor
 import com.practicum.playlistmaker.domain.interactor.history.SaveToHistoryInteractor
 import com.practicum.playlistmaker.domain.interactor.search.SearchTracksInteractor
+import com.practicum.playlistmaker.presentation.media.favorite.FavoriteTracksViewModel
+import com.practicum.playlistmaker.presentation.media.playlist.PlaylistsViewModel
 import com.practicum.playlistmaker.presentation.settings.SettingsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -35,6 +38,21 @@ val presentationModule = module {
 
     //PlayerViewModel
     viewModel { (track: TrackUiDto) ->
-        PlayerViewModel(track = track)
+        PlayerViewModel(
+            track = track,
+            mediaPlayer = get()
+        )
     }
+
+    //FavoriteTracksViewModel
+    viewModel {
+        FavoriteTracksViewModel()
+    }
+
+    //PlaylistsViewModel
+    viewModel {
+        PlaylistsViewModel()
+    }
+
+    factory { MediaPlayer() }
 }
