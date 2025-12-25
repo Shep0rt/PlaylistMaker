@@ -23,4 +23,9 @@
          <item name="colorOnSurfaceVariant">@color/black</item>
          <item name="colorItemTrack">@color/white</item>
      </style>
+
+     <style name="Theme.PlaylistMaker.MediaLibrary" parent="Base.Theme.PlaylistMaker">
+         <item name="colorPrimary">@color/black</item>
+         <item name="colorSurface">@color/white</item>
+     </style>
     </resources>

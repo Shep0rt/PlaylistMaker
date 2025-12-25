@@ -53,6 +53,15 @@
     <dimen name="padding_vertical_clear_history_button">8dp</dimen>
     <dimen name="search_history_clear_button_text_size">14sp</dimen>
 
+    <!--activity_media_library Избранные треки -->
+    <dimen name="media_library_text_size_title">22sp</dimen>
+    <dimen name="media_library_empty_size_text">19sp</dimen>
+    <dimen name="media_library_no_playlist_text">19sp</dimen>
 
+    <!--activity_media_library Плейлисты-->
+    <dimen name="margin_start_new_playlist_button">113dp</dimen>
+    <dimen name="margin_end_new_playlist_button">114dp</dimen>
+    <dimen name="padding_horizontal_new_playlist_button">10dp</dimen>
+    <dimen name="padding_vertical_new_playlist_button">10dp</dimen>
 
 </resources>
