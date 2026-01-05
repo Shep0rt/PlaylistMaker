@@ -3,48 +3,57 @@ package com.practicum.playlistmaker.presentation.search
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
 import androidx.core.view.isVisible
-import com.practicum.playlistmaker.databinding.ActivitySearchBinding
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import com.practicum.playlistmaker.databinding.FragmentSearchBinding
 import com.practicum.playlistmaker.presentation.models.TrackUiDto
-import com.practicum.playlistmaker.presentation.player.PlayerActivity
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class SearchActivity : AppCompatActivity() {
+class SearchFragment : Fragment() {
 
-    private lateinit var binding: ActivitySearchBinding
+    private lateinit var binding: FragmentSearchBinding
     private val viewModel: SearchViewModel by viewModel()
 
     private lateinit var searchAdapter: TrackAdapter
     private lateinit var historyAdapter: TrackAdapter
 
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        binding = FragmentSearchBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        binding = ActivitySearchBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        applyInsets()
         setupAdapters()
         setupListeners()
 
-        viewModel.searchState.observe(this) { state -> renderState(state) }
+        viewModel.searchState.observe(viewLifecycleOwner) { state -> renderState(state) }
+    }
+
+    private fun openPlayer(track: TrackUiDto) {
+        val action = SearchFragmentDirections.actionSearchFragmentToPlayerFragment(track)
+        findNavController().navigate(action)
     }
 
     private fun setupAdapters() {
-        searchAdapter = TrackAdapter(emptyList()) { ui ->
-            viewModel.onTrackClicked(ui)
-            startActivity(PlayerActivity.createIntent(this, ui))
+        searchAdapter = TrackAdapter(emptyList()) { track ->
+            viewModel.onTrackClicked(track)
+            openPlayer(track)
         }
 
-        historyAdapter = TrackAdapter(emptyList()) { ui ->
-            startActivity(PlayerActivity.createIntent(this, ui))
+        historyAdapter = TrackAdapter(emptyList()) { track ->
+            openPlayer(track)
         }
 
         binding.searchRecyclerView.adapter = searchAdapter
@@ -52,24 +61,20 @@ class SearchActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() = with(binding) {
-        //Действия при клике на кнопку "Назад" внутри раздела "Поиск"
-        searchToolbar.setNavigationOnClickListener { finish() }
-
-        //Работа поля поиска
-        //Дейтсвие при клике на кнопку "Х" внутри поля поиска
         clearButton.setOnClickListener {
             binding.searchEditText.text.clear()
+            hideKeyboard()
         }
-        //Действие при клике на кнопку "Обновить" на networkErrorPlaceholder
+
         networkErrorPlaceholder.retrySearchButton.setOnClickListener {
             val q = searchEditText.text.toString().trim()
             viewModel.retry(q)
         }
-        //Действие при клике на кнопку "Очистить историю"
+
         searchHistory.clearHistoryButton.setOnClickListener {
             viewModel.clearHistory()
         }
-        //Действия с текстом внутри поля поиска
+
         searchEditText.addTextChangedListener(object : TextWatcher {
             override fun beforeTextChanged(s: CharSequence?, start: Int, c: Int, a: Int) {}
             override fun onTextChanged(s: CharSequence?, start: Int, b: Int, c: Int) {
@@ -94,16 +99,6 @@ class SearchActivity : AppCompatActivity() {
             } else false
         }
     }
-
-    private fun applyInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.rootLayout) { v, insets ->
-            val sys = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(v.paddingLeft, sys.top, v.paddingRight, v.paddingBottom)
-            insets
-        }
-    }
-
-    //Методы рендеры
 
     private fun renderState(state: SearchState) {
         when (state) {
@@ -135,7 +130,7 @@ class SearchActivity : AppCompatActivity() {
     private fun showContent(tracks: List<TrackUiDto>) = with(binding) {
         searchProgressBar.isVisible = false
         networkErrorPlaceholder.searchNetworkError.isVisible = false
-        notResultPlaceholder.searchNotResultPlaceholder.isVisible  = false
+        notResultPlaceholder.searchNotResultPlaceholder.isVisible = false
         searchHistory.historyView.isVisible = false
         searchRecyclerView.isVisible = true
         searchAdapter.submitList(tracks)
@@ -172,9 +167,8 @@ class SearchActivity : AppCompatActivity() {
         networkErrorPlaceholder.searchNetworkError.isVisible = true
     }
 
-    //Методы утилиты
     private fun hideKeyboard() {
-        val imm = getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm = requireActivity().getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(binding.searchEditText.windowToken, 0)
     }
 }

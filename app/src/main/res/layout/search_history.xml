@@ -7,6 +7,7 @@
     android:layout_height="wrap_content"
     android:orientation="vertical"
     android:gravity="center_horizontal"
+    android:theme="@style/Theme.PlaylistMaker.Search"
     android:visibility="gone">
 
     <TextView

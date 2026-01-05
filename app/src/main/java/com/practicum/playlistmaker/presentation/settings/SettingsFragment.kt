@@ -3,32 +3,34 @@ package com.practicum.playlistmaker.presentation.settings
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import android.widget.Toast
-import androidx.appcompat.app.AppCompatActivity
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.net.toUri
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowCompat
-import androidx.core.view.WindowInsetsCompat
-import androidx.core.view.updatePadding
+import androidx.fragment.app.Fragment
 import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.databinding.ActivitySettingsBinding
+import com.practicum.playlistmaker.databinding.FragmentSettingsBinding
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
-class SettingsActivity : AppCompatActivity() {
+class SettingsFragment : Fragment() {
 
-    private lateinit var binding: ActivitySettingsBinding
+    private lateinit var binding: FragmentSettingsBinding
     private val viewModel: SettingsViewModel by viewModel()
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        WindowCompat.setDecorFitsSystemWindows(window, false)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        binding = FragmentSettingsBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        super.onCreate(savedInstanceState)
-        binding = ActivitySettingsBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
 
-        applyWindowInsets()
-        setupToolbar()
         setupThemeObserver()
         setupThemeSwitchListener()
         setupShareListener()
@@ -36,22 +38,8 @@ class SettingsActivity : AppCompatActivity() {
         setupAgreementListener()
     }
 
-    private fun applyWindowInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.rootLayout) { view, insets ->
-            val statusBarInsets = insets.getInsets(WindowInsetsCompat.Type.statusBars())
-            view.updatePadding(top = statusBarInsets.top)
-            insets
-        }
-    }
-
-    private fun setupToolbar() {
-        //Действия при клике на кнопку "Назад" внутри раздела "Настройки"
-        binding.settingsToolbar.setNavigationOnClickListener { finish() }
-    }
-
     private fun setupThemeObserver() {
-        // Инициируем UI текущим значением темы
-        viewModel.darkModeEnabled.observe(this) { isDark ->
+        viewModel.darkModeEnabled.observe(viewLifecycleOwner) { isDark ->
             if (binding.themeSwitch.isChecked != isDark) {
                 binding.themeSwitch.isChecked = isDark
             }
@@ -64,14 +52,12 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun setupThemeSwitchListener() {
-        //Действия при клике на свитчер темы
         binding.themeSwitch.setOnCheckedChangeListener { _, checked ->
             viewModel.setDarkMode(checked)
         }
     }
 
     private fun setupShareListener() {
-        //Действия при клике на кнопку "Поделится приложением" внутри раздела "Настройки"
         binding.shareText.setOnClickListener {
             val intent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
@@ -82,7 +68,6 @@ class SettingsActivity : AppCompatActivity() {
     }
 
     private fun setupSupportListener() {
-        //Действия при клике на кнопку "Написать в поддержку" внутри раздела "Настройки"
         binding.support.setOnClickListener {
             val email = "mailto:" + Uri.encode(getString(R.string.email_address)) +
                     "?subject=" + Uri.encode(getString(R.string.support_subject)) +
@@ -91,22 +76,21 @@ class SettingsActivity : AppCompatActivity() {
             val intent = Intent(Intent.ACTION_SENDTO).apply {
                 data = email.toUri()
             }
-            if (intent.resolveActivity(packageManager) != null) {
+            if (intent.resolveActivity(requireActivity().packageManager) != null) {
                 startActivity(intent)
             } else {
-                Toast.makeText(this, getString(R.string.error_not_app_email), Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.error_not_app_email), Toast.LENGTH_SHORT).show()
             }
         }
     }
 
     private fun setupAgreementListener() {
-        //Действия при клике на кнопку "Пользовательское соглашение" внутри раздела "Настройки"
         binding.userAgreement.setOnClickListener {
             val intent = Intent(Intent.ACTION_VIEW, getString(R.string.practicum_offer).toUri())
-            if (intent.resolveActivity(packageManager) != null) {
+            if (intent.resolveActivity(requireActivity().packageManager) != null) {
                 startActivity(intent)
             } else {
-                Toast.makeText(this, getString(R.string.error_not_app_link), Toast.LENGTH_SHORT).show()
+                Toast.makeText(requireContext(), getString(R.string.error_not_app_link), Toast.LENGTH_SHORT).show()
             }
         }
     }
