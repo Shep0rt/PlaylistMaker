@@ -6,7 +6,8 @@
     android:paddingTop="110dp"
     android:orientation="vertical"
     android:gravity="center"
-    android:visibility="gone">
+    android:visibility="gone"
+    android:theme="@style/Theme.PlaylistMaker.Search">
 
     <ImageView
         android:id="@+id/search_not_result_image"

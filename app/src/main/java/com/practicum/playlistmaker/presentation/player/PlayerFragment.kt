@@ -1,45 +1,44 @@
 package com.practicum.playlistmaker.presentation.player
 
-import android.content.Context
-import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.util.TypedValue
-import androidx.activity.enableEdgeToEdge
-import androidx.appcompat.app.AppCompatActivity
-import androidx.core.view.ViewCompat
-import androidx.core.view.WindowInsetsCompat
+import android.view.LayoutInflater
+import android.view.View
+import android.view.ViewGroup
 import androidx.core.view.isVisible
+import androidx.fragment.app.Fragment
+import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.FitCenter
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.practicum.playlistmaker.R
-import android.os.Parcelable
-import com.practicum.playlistmaker.databinding.ActivityPlayerBinding
+import com.practicum.playlistmaker.databinding.FragmentPlayerBinding
 import com.practicum.playlistmaker.presentation.models.TrackUiDto
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
-class PlayerActivity : AppCompatActivity() {
+class PlayerFragment : Fragment() {
 
-    private lateinit var binding: ActivityPlayerBinding
-    private lateinit var track: TrackUiDto
+    private lateinit var binding: FragmentPlayerBinding
+    private val args by navArgs<PlayerFragmentArgs>()
+    private val track: TrackUiDto by lazy { args.track }
     private val viewModel: PlayerViewModel by viewModel {
         parametersOf(track)
     }
 
-    override fun onCreate(savedInstanceState: Bundle?) {
-        super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
-        binding = ActivityPlayerBinding.inflate(layoutInflater)
-        setContentView(binding.root)
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        binding = FragmentPlayerBinding.inflate(inflater, container, false)
+        return binding.root
+    }
 
-        applyInsets()
-        //Получаем трек и присваиваем значения во Views
-        track = getParcelableExtraCompat(EXTRA_TRACK) ?: run {
-            finish()
-            return
-        }
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
         bindTrack(track)
         setupObservers()
         setupListeners()
@@ -51,7 +50,7 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun setupObservers() {
-        viewModel.uiState.observe(this) { state ->
+        viewModel.uiState.observe(viewLifecycleOwner) { state ->
             binding.play.isEnabled = state.playerState != PlayerState.Default
             binding.play.setImageResource(
                 if (state.playerState == PlayerState.Playing)
@@ -64,31 +63,21 @@ class PlayerActivity : AppCompatActivity() {
     }
 
     private fun setupListeners() {
-        binding.toolbarPlayer.setNavigationOnClickListener { finish() }
+        binding.toolbarPlayer.setNavigationOnClickListener { findNavController().navigateUp() }
 
         binding.play.setOnClickListener {
             viewModel.onPlayButtonClicked()
         }
     }
 
-    private fun applyInsets() {
-        ViewCompat.setOnApplyWindowInsetsListener(binding.playerScroll) { v, insets ->
-            val sys = insets.getInsets(WindowInsetsCompat.Type.systemBars())
-            v.setPadding(sys.left, sys.top, sys.right, sys.bottom)
-            insets
-        }
-    }
-
     private fun bindTrack(track: TrackUiDto) = with(binding) {
-        //заголовки
         titleTrack.text = track.trackName
         artist.text = track.artistName
         descriptionDurationValue.text = track.trackTime
 
-        //обложка
         val hiResUrl = viewModel.toHighResArtwork(track.artworkUrl100)
 
-        Glide.with(this@PlayerActivity)
+        Glide.with(this@PlayerFragment)
             .load(hiResUrl)
             .transform(
                 FitCenter(),
@@ -105,49 +94,24 @@ class PlayerActivity : AppCompatActivity() {
             .fallback(R.drawable.ic_not_cover_placeholder312)
             .into(cover)
 
-        //альбом
         val albumField = viewModel.createOptionalField(track.collectionName)
         descriptionAlbumText.isVisible = albumField.isVisible
         descriptionAlbumValue.isVisible = albumField.isVisible
         descriptionAlbumValue.text = albumField.text
 
-        //год
         val yearField = viewModel.createOptionalField(viewModel.isoToYear(track.releaseDate))
         descriptionYearText.isVisible = yearField.isVisible
         descriptionYearValue.isVisible = yearField.isVisible
         descriptionYearValue.text = yearField.text
 
-        //жанр
         val genreField = viewModel.createOptionalField(track.primaryGenreName)
         descriptionGenreText.isVisible = genreField.isVisible
         descriptionGenreValue.isVisible = genreField.isVisible
         descriptionGenreValue.text = genreField.text
 
-        //страна
         val countryField = viewModel.createOptionalField(track.country)
         descriptionCountryText.isVisible = countryField.isVisible
         descriptionCountryValue.isVisible = countryField.isVisible
         descriptionCountryValue.text = countryField.text
-    }
-
-    private inline fun <reified T : Parcelable> AppCompatActivity.getParcelableExtraCompat(
-        key: String
-    ): T? {
-        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra(key, T::class.java)
-        } else {
-            @Suppress("DEPRECATION")
-            intent.getParcelableExtra(key)
-        }
-    }
-
-    companion object {
-        private const val EXTRA_TRACK = "extra_track"
-
-        fun createIntent(context: Context, track: TrackUiDto): Intent {
-            return Intent(context, PlayerActivity::class.java).apply {
-                putExtra(EXTRA_TRACK, track)
-            }
-        }
     }
 }
