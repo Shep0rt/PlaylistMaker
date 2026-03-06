@@ -1,18 +1,18 @@
 package com.practicum.playlistmaker.presentation.search
 
-import android.os.Handler
-import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.practicum.playlistmaker.domain.interactor.history.ClearHistoryInteractor
 import com.practicum.playlistmaker.domain.interactor.history.GetHistoryInteractor
 import com.practicum.playlistmaker.domain.interactor.history.SaveToHistoryInteractor
 import com.practicum.playlistmaker.domain.interactor.search.SearchTracksInteractor
-import java.util.concurrent.Executors
 import com.practicum.playlistmaker.presentation.mappers.DomainToUiMapper
 import com.practicum.playlistmaker.presentation.mappers.UiToDomainMapper
 import com.practicum.playlistmaker.presentation.models.TrackUiDto
+import com.practicum.playlistmaker.util.debounce
+import kotlinx.coroutines.launch
 
 class SearchViewModel(
     private val searchTracksInteractor: SearchTracksInteractor,
@@ -24,14 +24,15 @@ class SearchViewModel(
     private val state = MutableLiveData<SearchState>()
     val searchState: LiveData<SearchState> = state
 
-    private val bg = Executors.newSingleThreadExecutor()
-    private val main = Handler(Looper.getMainLooper())
+    private var lastSearchText: String? = null
 
-    private val searchHandler = Handler(Looper.getMainLooper())
-    private var searchRunnable: Runnable? = null
+    private val trackSearchDebounce = debounce<String>(SEARCH_DEBOUNCE_DELAY, viewModelScope, true) { text ->
+        performSearch(text)
+    }
 
-    private var clickAllowed = true
-    private val clickHandler = Handler(Looper.getMainLooper())
+    private val onTrackClickDebounce = debounce<TrackUiDto>(CLICK_DEBOUNCE_DELAY, viewModelScope, false) { track ->
+        saveTrackToHistory(track)
+    }
 
     companion object {
         private const val SEARCH_DEBOUNCE_DELAY = 2000L
@@ -39,46 +40,40 @@ class SearchViewModel(
     }
 
     fun onQueryChanged(text: String) {
-        if (text.isBlank()) {
-            cancelDebounce()
-            loadHistory()
-            return
-        }
+        if (lastSearchText == text) return
+        lastSearchText = text
 
-        state.value = SearchState.Idle
-        debounceSearch(text)
+        if (text.isBlank()) {
+            loadHistory()
+        } else {
+            state.value = SearchState.Idle
+            trackSearchDebounce(text)
+        }
     }
 
     fun loadHistory() {
-        bg.execute {
+        viewModelScope.launch {
             val domain = getHistoryInteractor.execute()
             val ui = DomainToUiMapper.listToUi(domain)
-            main.post {
-                if (ui.isEmpty()) {
-                    state.value = SearchState.Idle
-                } else {
-                    state.value = SearchState.History(ui)
-                }
-            }
+            state.value = if (ui.isEmpty()) SearchState.Idle else SearchState.History(ui)
         }
     }
 
     fun onTrackClicked(track: TrackUiDto) {
-        if (!clickAllowed) return
+        onTrackClickDebounce(track)
+    }
 
-        clickAllowed = false
-        clickHandler.postDelayed({ clickAllowed = true }, CLICK_DEBOUNCE_DELAY)
-
-        bg.execute {
+    private fun saveTrackToHistory(track: TrackUiDto) {
+        viewModelScope.launch {
             val domain = UiToDomainMapper.trackToDomain(track)
             saveToHistoryInteractor.execute(domain)
         }
     }
 
     fun clearHistory() {
-        bg.execute {
+        viewModelScope.launch {
             clearHistoryInteractor.execute()
-            main.post { state.value = SearchState.History(emptyList()) }
+            state.value = SearchState.History(emptyList())
         }
     }
 
@@ -86,36 +81,22 @@ class SearchViewModel(
         if (query.isNotBlank()) performSearch(query)
     }
 
-    private fun debounceSearch(query: String) {
-        cancelDebounce()
-
-        val runnable = Runnable {
-            performSearch(query)
-        }
-        searchRunnable = runnable
-        searchHandler.postDelayed(runnable, SEARCH_DEBOUNCE_DELAY)
-    }
-
-    private fun cancelDebounce() {
-        searchRunnable?.let { searchHandler.removeCallbacks(it) }
-    }
-
     private fun performSearch(query: String) {
-        state.postValue(SearchState.Loading)
+        if (query.isBlank()) return
 
-        searchTracksInteractor.execute(query) { result ->
-            main.post {
-                result.onSuccess { domain ->
-                    val list = domain.map { DomainToUiMapper.trackToUi(it) }
-                    if (list.isEmpty()) {
-                        state.value = SearchState.Empty
-                    } else {
-                        state.value = SearchState.Content(list)
+        state.value = SearchState.Loading
+
+        viewModelScope.launch {
+            searchTracksInteractor
+                .execute(query)
+                .collect { result ->
+                    result.onSuccess { domain ->
+                        val list = domain.map { DomainToUiMapper.trackToUi(it) }
+                        state.value = if (list.isEmpty()) SearchState.Empty else SearchState.Content(list)
+                    }.onFailure {
+                        state.value = SearchState.Error
                     }
-                }.onFailure {
-                    state.value = SearchState.Error
                 }
-            }
         }
     }
 }

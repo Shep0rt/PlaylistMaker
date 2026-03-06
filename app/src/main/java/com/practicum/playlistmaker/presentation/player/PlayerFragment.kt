@@ -20,9 +20,11 @@ import org.koin.core.parameter.parametersOf
 
 class PlayerFragment : Fragment() {
 
-    private lateinit var binding: FragmentPlayerBinding
+    private var _binding: FragmentPlayerBinding? = null
+    private val binding get() = _binding!!
+
     private val args by navArgs<PlayerFragmentArgs>()
-    private val track: TrackUiDto by lazy { args.track }
+    private val track: TrackUiDto by lazy(LazyThreadSafetyMode.NONE) { args.track }
     private val viewModel: PlayerViewModel by viewModel {
         parametersOf(track)
     }
@@ -32,7 +34,7 @@ class PlayerFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentPlayerBinding.inflate(inflater, container, false)
+        _binding = FragmentPlayerBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -47,6 +49,11 @@ class PlayerFragment : Fragment() {
     override fun onPause() {
         super.onPause()
         viewModel.onPause()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private fun setupObservers() {

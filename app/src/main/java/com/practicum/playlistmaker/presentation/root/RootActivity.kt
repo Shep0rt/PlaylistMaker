@@ -34,6 +34,10 @@ class RootActivity : AppCompatActivity() {
             insets
         }
 
+        setupNavigation()
+    }
+
+    private fun setupNavigation() {
         val navHostFragment = supportFragmentManager.findFragmentById(R.id.rootFragmentContainerView) as NavHostFragment
         val navController = navHostFragment.navController
 
