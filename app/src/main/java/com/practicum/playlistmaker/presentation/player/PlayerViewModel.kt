@@ -1,14 +1,16 @@
 package com.practicum.playlistmaker.presentation.player
 
 import android.media.MediaPlayer
-import android.os.Handler
-import android.os.Looper
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.practicum.playlistmaker.presentation.models.OptionalField
 import com.practicum.playlistmaker.presentation.models.PlayerUiState
 import com.practicum.playlistmaker.presentation.models.TrackUiDto
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
 
@@ -22,20 +24,7 @@ class PlayerViewModel(private val track: TrackUiDto, private val mediaPlayer: Me
     )
     val uiState: LiveData<PlayerUiState> = state
 
-    private val handler = Handler(Looper.getMainLooper())
-
-    private val timerRunnable = object : Runnable {
-        override fun run() {
-            val currentState = state.value ?: return
-            if (currentState.playerState != PlayerState.Playing) return
-
-            val formatted = SimpleDateFormat("m:ss", Locale.getDefault())
-                .format(mediaPlayer.currentPosition)
-            setProgress(formatted)
-
-            handler.postDelayed(this, PlayerConstants.DELAY_REFRESH_DURATION_TRACK)
-        }
-    }
+    private var timerJob: Job? = null
 
     init {
         preparePlayer()
@@ -44,15 +33,14 @@ class PlayerViewModel(private val track: TrackUiDto, private val mediaPlayer: Me
     override fun onCleared() {
         super.onCleared()
         mediaPlayer.release()
-        resetTimer()
+        timerJob?.cancel()
     }
 
     fun onPlayButtonClicked() {
         when(state.value?.playerState) {
             PlayerState.Playing -> pausePlayer()
             PlayerState.Prepared, PlayerState.Paused -> startPlayer()
-            PlayerState.Default -> {}
-            null -> {}
+            else -> {}
         }
     }
 
@@ -65,7 +53,7 @@ class PlayerViewModel(private val track: TrackUiDto, private val mediaPlayer: Me
             playerState = PlayerState.Default,
             progress = PlayerConstants.DEFAULT_POSITION_TRACK
         )
-        state.postValue(transform(current))
+        state.value = transform(current)
     }
 
     private fun setPlayerState(state: PlayerState) {
@@ -99,7 +87,7 @@ class PlayerViewModel(private val track: TrackUiDto, private val mediaPlayer: Me
             setPlayerState(PlayerState.Prepared)
         }
         mediaPlayer.setOnCompletionListener {
-            pauseTimer()
+            timerJob?.cancel()
             mediaPlayer.seekTo(0)
             updateState {
                 it.copy(
@@ -113,25 +101,25 @@ class PlayerViewModel(private val track: TrackUiDto, private val mediaPlayer: Me
     private fun startPlayer() {
         mediaPlayer.start()
         setPlayerState(PlayerState.Playing)
-        startTimerUpdate()
+        startTimer()
     }
 
     private fun pausePlayer() {
-        pauseTimer()
         mediaPlayer.pause()
         setPlayerState(PlayerState.Paused)
+        timerJob?.cancel()
     }
 
-    private fun startTimerUpdate() {
-        handler.post(timerRunnable)
+    private fun startTimer() {
+        timerJob = viewModelScope.launch {
+            while (state.value?.playerState == PlayerState.Playing) {
+                delay(PlayerConstants.DELAY_REFRESH_DURATION_TRACK)
+                setProgress(formatTime(mediaPlayer.currentPosition))
+            }
+        }
     }
 
-    private fun pauseTimer() {
-        handler.removeCallbacks(timerRunnable)
-    }
-
-    private fun resetTimer() {
-        handler.removeCallbacks(timerRunnable)
-        setProgress(PlayerConstants.DEFAULT_POSITION_TRACK)
+    private fun formatTime(time: Int): String {
+        return SimpleDateFormat("m:ss", Locale.getDefault()).format(time)
     }
 }

@@ -16,7 +16,9 @@ import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SettingsFragment : Fragment() {
 
-    private lateinit var binding: FragmentSettingsBinding
+    private var _binding: FragmentSettingsBinding? = null
+    private val binding get() = _binding!!
+
     private val viewModel: SettingsViewModel by viewModel()
 
     override fun onCreateView(
@@ -24,7 +26,7 @@ class SettingsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentSettingsBinding.inflate(inflater, container, false)
+        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -36,6 +38,11 @@ class SettingsFragment : Fragment() {
         setupShareListener()
         setupSupportListener()
         setupAgreementListener()
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
     }
 
     private fun setupThemeObserver() {
@@ -58,8 +65,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun setupShareListener() {
-        binding.shareText.setOnClickListener {
-            val intent = Intent(Intent.ACTION_SEND).apply {
+        binding.shareText.setOnClickListener { val intent = Intent(Intent.ACTION_SEND).apply {
                 type = "text/plain"
                 putExtra(Intent.EXTRA_TEXT, getString(R.string.share_app_text))
             }
@@ -68,8 +74,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun setupSupportListener() {
-        binding.support.setOnClickListener {
-            val email = "mailto:" + Uri.encode(getString(R.string.email_address)) +
+        binding.support.setOnClickListener { val email = "mailto:" + Uri.encode(getString(R.string.email_address)) +
                     "?subject=" + Uri.encode(getString(R.string.support_subject)) +
                     "&body=" + Uri.encode(getString(R.string.support_body))
 
@@ -85,8 +90,7 @@ class SettingsFragment : Fragment() {
     }
 
     private fun setupAgreementListener() {
-        binding.userAgreement.setOnClickListener {
-            val intent = Intent(Intent.ACTION_VIEW, getString(R.string.practicum_offer).toUri())
+        binding.userAgreement.setOnClickListener { val intent = Intent(Intent.ACTION_VIEW, getString(R.string.practicum_offer).toUri())
             if (intent.resolveActivity(requireActivity().packageManager) != null) {
                 startActivity(intent)
             } else {
