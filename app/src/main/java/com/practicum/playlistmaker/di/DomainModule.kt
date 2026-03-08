@@ -1,8 +1,18 @@
 package com.practicum.playlistmaker.di
 
+import com.practicum.playlistmaker.domain.interactor.favorite.AddTrackToFavoritesInteractor
+import com.practicum.playlistmaker.domain.interactor.favorite.GetFavoriteTrackIdsInteractor
+import com.practicum.playlistmaker.domain.interactor.favorite.GetFavoriteTracksInteractor
+import com.practicum.playlistmaker.domain.interactor.favorite.IsFavoriteTrackInteractor
+import com.practicum.playlistmaker.domain.interactor.favorite.RemoveTrackFromFavoritesInteractor
 import com.practicum.playlistmaker.domain.interactor.history.ClearHistoryInteractor
 import com.practicum.playlistmaker.domain.interactor.history.GetHistoryInteractor
 import com.practicum.playlistmaker.domain.interactor.history.SaveToHistoryInteractor
+import com.practicum.playlistmaker.domain.interactor.impl.favorite.AddTrackToFavoritesInteractorImpl
+import com.practicum.playlistmaker.domain.interactor.impl.favorite.GetFavoriteTrackIdsInteractorImpl
+import com.practicum.playlistmaker.domain.interactor.impl.favorite.GetFavoriteTracksInteractorImpl
+import com.practicum.playlistmaker.domain.interactor.impl.favorite.IsFavoriteTrackInteractorImpl
+import com.practicum.playlistmaker.domain.interactor.impl.favorite.RemoveTrackFromFavoritesInteractorImpl
 import com.practicum.playlistmaker.domain.interactor.impl.history.ClearHistoryInteractorImpl
 import com.practicum.playlistmaker.domain.interactor.impl.history.GetHistoryInteractorImpl
 import com.practicum.playlistmaker.domain.interactor.impl.history.SaveToHistoryInteractorImpl
@@ -15,6 +25,7 @@ import com.practicum.playlistmaker.domain.interactor.theme.SetThemeInteractor
 import com.practicum.playlistmaker.domain.repository.HistoryRepository
 import com.practicum.playlistmaker.domain.repository.ThemeRepository
 import com.practicum.playlistmaker.domain.repository.TrackRepository
+import com.practicum.playlistmaker.domain.repository.FavoriteTrackRepository
 import org.koin.dsl.module
 
 val domainModule = module {
@@ -41,7 +52,8 @@ val domainModule = module {
     //Поиск треков
     factory<SearchTracksInteractor> {
         SearchTracksInteractorImpl(
-            repo = get<TrackRepository>()
+            repo = get<TrackRepository>(),
+            favoriteRepository = get<FavoriteTrackRepository>()
         )
     }
 
@@ -55,6 +67,37 @@ val domainModule = module {
     factory<SetThemeInteractor> {
         SetThemeInteractorImpl(
             repo = get<ThemeRepository>()
+        )
+    }
+
+    //Избранные треки
+    factory<AddTrackToFavoritesInteractor> {
+        AddTrackToFavoritesInteractorImpl(
+            favoriteTrackRepository = get<FavoriteTrackRepository>()
+        )
+    }
+
+    factory<RemoveTrackFromFavoritesInteractor> {
+        RemoveTrackFromFavoritesInteractorImpl(
+            favoriteTrackRepository = get<FavoriteTrackRepository>()
+        )
+    }
+
+    factory<GetFavoriteTracksInteractor> {
+        GetFavoriteTracksInteractorImpl(
+            favoriteTrackRepository = get<FavoriteTrackRepository>()
+        )
+    }
+
+    factory<IsFavoriteTrackInteractor> {
+        IsFavoriteTrackInteractorImpl(
+            favoriteTrackRepository = get<FavoriteTrackRepository>()
+        )
+    }
+
+    factory<GetFavoriteTrackIdsInteractor> {
+        GetFavoriteTrackIdsInteractorImpl(
+            favoriteTrackRepository = get<FavoriteTrackRepository>()
         )
     }
 }

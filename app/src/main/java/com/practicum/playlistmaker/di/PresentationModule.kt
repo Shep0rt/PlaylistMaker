@@ -1,6 +1,10 @@
 package com.practicum.playlistmaker.di
 
 import android.media.MediaPlayer
+import com.practicum.playlistmaker.domain.interactor.favorite.AddTrackToFavoritesInteractor
+import com.practicum.playlistmaker.domain.interactor.favorite.GetFavoriteTracksInteractor
+import com.practicum.playlistmaker.domain.interactor.favorite.IsFavoriteTrackInteractor
+import com.practicum.playlistmaker.domain.interactor.favorite.RemoveTrackFromFavoritesInteractor
 import com.practicum.playlistmaker.domain.interactor.history.ClearHistoryInteractor
 import com.practicum.playlistmaker.domain.interactor.history.GetHistoryInteractor
 import com.practicum.playlistmaker.domain.interactor.history.SaveToHistoryInteractor
@@ -40,13 +44,18 @@ val presentationModule = module {
     viewModel { (track: TrackUiDto) ->
         PlayerViewModel(
             track = track,
-            mediaPlayer = get()
+            mediaPlayer = get(),
+            addTrackToFavoritesInteractor = get<AddTrackToFavoritesInteractor>(),
+            removeTrackFromFavoritesInteractor = get<RemoveTrackFromFavoritesInteractor>(),
+            isFavoriteTrackInteractor = get<IsFavoriteTrackInteractor>()
         )
     }
 
     //FavoriteTracksViewModel
     viewModel {
-        FavoriteTracksViewModel()
+        FavoriteTracksViewModel(
+            getFavoriteTracksInteractor = get<GetFavoriteTracksInteractor>()
+        )
     }
 
     //PlaylistsViewModel
