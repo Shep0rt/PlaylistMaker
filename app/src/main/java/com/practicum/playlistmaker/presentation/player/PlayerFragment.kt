@@ -66,6 +66,13 @@ class PlayerFragment : Fragment() {
                     R.drawable.ic_button_play100
             )
             binding.durationTrack.text = state.progress
+            
+            binding.like.setImageResource(
+                if (state.isFavorite)
+                    R.drawable.ic_like51_active
+                else
+                    R.drawable.ic_like51_inactive
+            )
         }
     }
 
@@ -74,6 +81,10 @@ class PlayerFragment : Fragment() {
 
         binding.play.setOnClickListener {
             viewModel.onPlayButtonClicked()
+        }
+
+        binding.like.setOnClickListener {
+            viewModel.onFavoriteButtonClicked()
         }
     }
 

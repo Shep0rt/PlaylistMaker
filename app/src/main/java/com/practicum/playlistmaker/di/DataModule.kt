@@ -2,17 +2,23 @@ package com.practicum.playlistmaker.di
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.room.Room
 import com.google.gson.Gson
+import com.practicum.playlistmaker.data.FavoriteTrackRepositoryImpl
 import com.practicum.playlistmaker.data.HistoryRepositoryImpl
 import com.practicum.playlistmaker.data.ThemeRepositoryImpl
 import com.practicum.playlistmaker.data.TrackRepositoryImpl
+import com.practicum.playlistmaker.data.db.AppDatabase
+import com.practicum.playlistmaker.data.db.mappers.TrackDbMapper
 import com.practicum.playlistmaker.data.history.TrackHistorySharedPrefs
 import com.practicum.playlistmaker.data.history.TracksHistoryDataSource
 import com.practicum.playlistmaker.data.network.ITunesApiService
+import com.practicum.playlistmaker.domain.repository.FavoriteTrackRepository
 import com.practicum.playlistmaker.domain.repository.HistoryRepository
 import com.practicum.playlistmaker.domain.repository.ThemeRepository
 import com.practicum.playlistmaker.domain.repository.TrackRepository
 import com.practicum.playlistmaker.util.Constants
+import org.koin.android.ext.koin.androidContext
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import retrofit2.Retrofit
@@ -22,6 +28,30 @@ val TRACK_HISTORY_PREFS = named("history_search_track_prefs")
 val THEME_PREFS = named("theme_prefs")
 
 val dataModule = module {
+
+    //База данных
+    single {
+        Room.databaseBuilder(androidContext(), AppDatabase::class.java, "database.db")
+            .build()
+    }
+
+    single {
+        get<AppDatabase>().favoriteTrackDao()
+    }
+
+    factory {
+        TrackDbMapper()
+    }
+
+    //Репозитории
+
+    //Избранные треки
+    single<FavoriteTrackRepository> {
+        FavoriteTrackRepositoryImpl(
+            appDatabase = get(),
+            trackDbMapper = get()
+        )
+    }
 
     //История поиска треков
     single<TracksHistoryDataSource> {
