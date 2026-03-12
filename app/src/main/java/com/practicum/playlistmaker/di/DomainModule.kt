@@ -19,10 +19,17 @@ import com.practicum.playlistmaker.domain.interactor.impl.history.SaveToHistoryI
 import com.practicum.playlistmaker.domain.interactor.impl.search.SearchTracksInteractorImpl
 import com.practicum.playlistmaker.domain.interactor.impl.theme.GetThemeInteractorImpl
 import com.practicum.playlistmaker.domain.interactor.impl.theme.SetThemeInteractorImpl
+import com.practicum.playlistmaker.domain.interactor.impl.playlist.CreatePlaylistInteractorImpl
+import com.practicum.playlistmaker.domain.interactor.impl.playlist.AddTrackToPlaylistInteractorImpl
+import com.practicum.playlistmaker.domain.interactor.impl.playlist.GetPlaylistsInteractorImpl
+import com.practicum.playlistmaker.domain.interactor.playlist.AddTrackToPlaylistInteractor
+import com.practicum.playlistmaker.domain.interactor.playlist.CreatePlaylistInteractor
+import com.practicum.playlistmaker.domain.interactor.playlist.GetPlaylistsInteractor
 import com.practicum.playlistmaker.domain.interactor.search.SearchTracksInteractor
 import com.practicum.playlistmaker.domain.interactor.theme.GetThemeInteractor
 import com.practicum.playlistmaker.domain.interactor.theme.SetThemeInteractor
 import com.practicum.playlistmaker.domain.repository.HistoryRepository
+import com.practicum.playlistmaker.domain.repository.PlaylistRepository
 import com.practicum.playlistmaker.domain.repository.ThemeRepository
 import com.practicum.playlistmaker.domain.repository.TrackRepository
 import com.practicum.playlistmaker.domain.repository.FavoriteTrackRepository
@@ -52,8 +59,7 @@ val domainModule = module {
     //Поиск треков
     factory<SearchTracksInteractor> {
         SearchTracksInteractorImpl(
-            repo = get<TrackRepository>(),
-            favoriteRepository = get<FavoriteTrackRepository>()
+            repo = get<TrackRepository>()
         )
     }
 
@@ -98,6 +104,25 @@ val domainModule = module {
     factory<GetFavoriteTrackIdsInteractor> {
         GetFavoriteTrackIdsInteractorImpl(
             favoriteTrackRepository = get<FavoriteTrackRepository>()
+        )
+    }
+
+    //Плейлисты
+    factory<CreatePlaylistInteractor> {
+        CreatePlaylistInteractorImpl(
+            playlistRepository = get<PlaylistRepository>()
+        )
+    }
+
+    factory<GetPlaylistsInteractor> {
+        GetPlaylistsInteractorImpl(
+            playlistRepository = get<PlaylistRepository>()
+        )
+    }
+
+    factory<AddTrackToPlaylistInteractor> {
+        AddTrackToPlaylistInteractorImpl(
+            playlistRepository = get<PlaylistRepository>()
         )
     }
 }

@@ -6,15 +6,18 @@ import androidx.room.Room
 import com.google.gson.Gson
 import com.practicum.playlistmaker.data.FavoriteTrackRepositoryImpl
 import com.practicum.playlistmaker.data.HistoryRepositoryImpl
+import com.practicum.playlistmaker.data.PlaylistRepositoryImpl
 import com.practicum.playlistmaker.data.ThemeRepositoryImpl
 import com.practicum.playlistmaker.data.TrackRepositoryImpl
 import com.practicum.playlistmaker.data.db.AppDatabase
+import com.practicum.playlistmaker.data.db.mappers.PlaylistDbMapper
 import com.practicum.playlistmaker.data.db.mappers.TrackDbMapper
 import com.practicum.playlistmaker.data.history.TrackHistorySharedPrefs
 import com.practicum.playlistmaker.data.history.TracksHistoryDataSource
 import com.practicum.playlistmaker.data.network.ITunesApiService
 import com.practicum.playlistmaker.domain.repository.FavoriteTrackRepository
 import com.practicum.playlistmaker.domain.repository.HistoryRepository
+import com.practicum.playlistmaker.domain.repository.PlaylistRepository
 import com.practicum.playlistmaker.domain.repository.ThemeRepository
 import com.practicum.playlistmaker.domain.repository.TrackRepository
 import com.practicum.playlistmaker.util.Constants
@@ -39,8 +42,24 @@ val dataModule = module {
         get<AppDatabase>().favoriteTrackDao()
     }
 
+    single {
+        get<AppDatabase>().trackDao()
+    }
+
+    single {
+        get<AppDatabase>().playlistDao()
+    }
+
+    single {
+        get<AppDatabase>().playlistTrackDao()
+    }
+
     factory {
         TrackDbMapper()
+    }
+
+    factory {
+        PlaylistDbMapper()
     }
 
     //Репозитории
@@ -48,7 +67,8 @@ val dataModule = module {
     //Избранные треки
     single<FavoriteTrackRepository> {
         FavoriteTrackRepositoryImpl(
-            appDatabase = get(),
+            favoriteTrackDao = get(),
+            trackDao = get(),
             trackDbMapper = get()
         )
     }
@@ -65,6 +85,17 @@ val dataModule = module {
     single<HistoryRepository> {
         HistoryRepositoryImpl(
             historyDataSource = get()
+        )
+    }
+
+    //Плейлисты
+    single<PlaylistRepository> {
+        PlaylistRepositoryImpl(
+            playlistDao = get(),
+            playlistTrackDao = get(),
+            trackDao = get(),
+            playlistDbMapper = get(),
+            trackDbMapper = get()
         )
     }
 

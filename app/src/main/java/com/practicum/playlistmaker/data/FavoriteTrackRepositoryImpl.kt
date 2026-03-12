@@ -1,40 +1,49 @@
 package com.practicum.playlistmaker.data
 
-import com.practicum.playlistmaker.data.db.AppDatabase
+import com.practicum.playlistmaker.data.db.dao.FavoriteTrackDao
+import com.practicum.playlistmaker.data.db.dao.TrackDao
+import com.practicum.playlistmaker.data.db.entity.FavoriteTrackEntity
 import com.practicum.playlistmaker.data.db.mappers.TrackDbMapper
 import com.practicum.playlistmaker.domain.models.Track
 import com.practicum.playlistmaker.domain.repository.FavoriteTrackRepository
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
 
 class FavoriteTrackRepositoryImpl(
-    private val appDatabase: AppDatabase,
+    private val favoriteTrackDao: FavoriteTrackDao,
+    private val trackDao: TrackDao,
     private val trackDbMapper: TrackDbMapper
 ) : FavoriteTrackRepository {
 
     override suspend fun addTrackToFavorite(track: Track) {
-        val entity = trackDbMapper.map(track)
-        appDatabase.favoriteTrackDao().insertFavoriteTrack(entity)
+        trackDao.insertTrack(trackDbMapper.map(track))
+        favoriteTrackDao.insertFavoriteTrack(
+            FavoriteTrackEntity(
+                trackId = track.id,
+                addedAt = System.currentTimeMillis()
+            )
+        )
     }
 
     override suspend fun deleteTrackFromFavorite(track: Track) {
-        val entity = trackDbMapper.map(track)
-        appDatabase.favoriteTrackDao().deleteFavoriteTrack(entity)
+        favoriteTrackDao.deleteFavoriteTrack(track.id)
     }
 
     override fun getFavoriteTracks(): Flow<List<Track>> {
-        return appDatabase.favoriteTrackDao().getFavoriteTracks().map { entities ->
-            entities.map { trackDbMapper.map(it) }
+        return favoriteTrackDao.getFavoriteTracks()
+            .distinctUntilChanged()
+            .map { entities ->
+                entities.map { trackDbMapper.map(it, isFavorite = true) }
         }
     }
 
     override fun getFavoriteTrackIds(): Flow<List<Long>> {
-        return appDatabase.favoriteTrackDao().getFavoriteTracks().map { entities ->
-            entities.map { it.trackId }
-        }
+        return favoriteTrackDao.getFavoriteTrackIds()
+            .distinctUntilChanged()
     }
 
     override suspend fun isFavorite(trackId: Long): Boolean {
-        return appDatabase.favoriteTrackDao().getFavoriteTrackIds().contains(trackId)
+        return favoriteTrackDao.isFavorite(trackId)
     }
 }
