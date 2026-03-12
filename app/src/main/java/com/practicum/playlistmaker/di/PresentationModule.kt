@@ -11,6 +11,7 @@ import com.practicum.playlistmaker.domain.interactor.history.SaveToHistoryIntera
 import com.practicum.playlistmaker.domain.interactor.search.SearchTracksInteractor
 import com.practicum.playlistmaker.presentation.media.favorite.FavoriteTracksViewModel
 import com.practicum.playlistmaker.presentation.media.playlist.PlaylistsViewModel
+import com.practicum.playlistmaker.presentation.media.playlist.CreatePlaylistViewModel
 import com.practicum.playlistmaker.presentation.settings.SettingsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -19,6 +20,9 @@ import com.practicum.playlistmaker.domain.interactor.theme.SetThemeInteractor
 import com.practicum.playlistmaker.presentation.player.PlayerViewModel
 import com.practicum.playlistmaker.presentation.search.SearchViewModel
 import com.practicum.playlistmaker.presentation.models.TrackUiDto
+import com.practicum.playlistmaker.domain.interactor.playlist.AddTrackToPlaylistInteractor
+import com.practicum.playlistmaker.domain.interactor.playlist.CreatePlaylistInteractor
+import com.practicum.playlistmaker.domain.interactor.playlist.GetPlaylistsInteractor
 
 val presentationModule = module {
 
@@ -47,7 +51,9 @@ val presentationModule = module {
             mediaPlayer = get(),
             addTrackToFavoritesInteractor = get<AddTrackToFavoritesInteractor>(),
             removeTrackFromFavoritesInteractor = get<RemoveTrackFromFavoritesInteractor>(),
-            isFavoriteTrackInteractor = get<IsFavoriteTrackInteractor>()
+            isFavoriteTrackInteractor = get<IsFavoriteTrackInteractor>(),
+            getPlaylistsInteractor = get<GetPlaylistsInteractor>(),
+            addTrackToPlaylistInteractor = get<AddTrackToPlaylistInteractor>()
         )
     }
 
@@ -60,7 +66,16 @@ val presentationModule = module {
 
     //PlaylistsViewModel
     viewModel {
-        PlaylistsViewModel()
+        PlaylistsViewModel(
+            getPlaylistsInteractor = get<GetPlaylistsInteractor>()
+        )
+    }
+
+    //CreatePlaylistViewModel
+    viewModel {
+        CreatePlaylistViewModel(
+            createPlaylistInteractor = get<CreatePlaylistInteractor>()
+        )
     }
 
     factory { MediaPlayer() }

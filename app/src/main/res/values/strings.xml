@@ -33,4 +33,15 @@
     <string name="new_playlist">Новый плейлист</string>
     <string name="favorite_tracks">Избранные треки</string>
     <string name="playlists">Плейлисты</string>
+    <string name="create_playlist_name_hint">Название*</string>
+    <string name="create_playlist_description_hint">Описание</string>
+    <string name="create_playlist_button">Создать</string>
+    <string name="create_playlist_exit_title">Завершить создание плейлиста?</string>
+    <string name="create_playlist_exit_message">Все несохраненные данные будут потеряны</string>
+    <string name="create_playlist_exit_cancel">Отмена</string>
+    <string name="create_playlist_exit_confirm">Завершить</string>
+    <string name="create_playlist_created_toast">Плейлист %1$s создан</string>
+    <string name="add_to_playlist_title">Добавить в плейлист</string>
+    <string name="track_added_to_playlist">Добавлено в плейлист %1$s</string>
+    <string name="track_already_in_playlist">Трек уже добавлен в плейлист %1$s</string>
 </resources>

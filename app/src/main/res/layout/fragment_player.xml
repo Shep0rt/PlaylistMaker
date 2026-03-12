@@ -1,17 +1,23 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.core.widget.NestedScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:id="@+id/playerScroll"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/playerRoot"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:fillViewport="true"
-    android:theme="@style/Theme.PlaylistMaker.Search"
-    android:background="?attr/colorPrimary">
+    android:background="?attr/colorPrimary"
+    android:theme="@style/Theme.PlaylistMaker.Search">
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-        android:id="@+id/playerRoot"
+    <androidx.core.widget.NestedScrollView
+        android:id="@+id/playerScroll"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" >
+        android:layout_height="match_parent"
+        android:fillViewport="true">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/playerContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" >
 
         <androidx.constraintlayout.widget.Guideline
             android:id="@+id/leftBorderTrack"
@@ -248,6 +254,61 @@
             app:layout_constraintEnd_toStartOf="@id/rightBorderDescription"
             app:layout_constraintBaseline_toBaselineOf="@id/descriptionCountryText" />
 
-    </androidx.constraintlayout.widget.ConstraintLayout>
+        </androidx.constraintlayout.widget.ConstraintLayout>
+    </androidx.core.widget.NestedScrollView>
 
-</androidx.core.widget.NestedScrollView>
+    <View
+        android:id="@+id/bottomSheetOverlay"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/bottom_sheet_overlay"
+        android:clickable="true"
+        android:visibility="gone" />
+
+    <LinearLayout
+        android:id="@+id/addToPlaylistBottomSheet"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@drawable/bottom_sheet_background"
+        android:orientation="vertical"
+        android:paddingTop="12dp"
+        android:paddingBottom="16dp"
+        app:behavior_hideable="true"
+        app:behavior_peekHeight="0dp"
+        app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+        <View
+            android:id="@+id/bottomSheetHandle"
+            android:layout_width="50dp"
+            android:layout_height="4dp"
+            android:layout_gravity="center_horizontal"
+            android:background="@drawable/bottom_sheet_handle" />
+
+        <TextView
+            android:id="@+id/bottomSheetTitle"
+            style="@style/BottomSheetTitle"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="30dp"
+            android:text="@string/add_to_playlist_title" />
+
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/bottomSheetNewPlaylistButton"
+            style="@style/NewPlaylist"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center_horizontal"
+            android:layout_marginTop="28dp" />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/playlistsBottomSheetRecycler"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_marginTop="16dp"
+            android:overScrollMode="never"
+            android:layout_weight="1"
+            android:clipToPadding="false"
+            tools:listitem="@layout/item_playlist_bottom_sheet" />
+    </LinearLayout>
+
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

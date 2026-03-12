@@ -63,5 +63,5 @@
     <dimen name="margin_end_new_playlist_button">114dp</dimen>
     <dimen name="padding_horizontal_new_playlist_button">10dp</dimen>
     <dimen name="padding_vertical_new_playlist_button">10dp</dimen>
-
+    <dimen name="playlist_grid_spacing">8dp</dimen>
 </resources>
