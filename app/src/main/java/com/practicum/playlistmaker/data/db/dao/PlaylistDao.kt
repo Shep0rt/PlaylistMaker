@@ -26,4 +26,28 @@ interface PlaylistDao {
             "ORDER BY p.createdAt DESC"
     )
     fun getPlaylists(): Flow<List<PlaylistWithTrackCount>>
+
+    @Query(
+        "SELECT p.*, COUNT(pt.trackId) AS trackCount " +
+            "FROM playlists p " +
+            "LEFT JOIN playlist_tracks pt ON p.id = pt.playlistId " +
+            "WHERE p.id = :playlistId " +
+            "GROUP BY p.id"
+    )
+    fun getPlaylistById(playlistId: Long): Flow<PlaylistWithTrackCount?>
+
+    @Query("DELETE FROM playlists WHERE id = :playlistId")
+    suspend fun deletePlaylist(playlistId: Long)
+
+    @Query(
+        "UPDATE playlists " +
+            "SET name = :name, description = :description, coverPath = :coverPath " +
+            "WHERE id = :playlistId"
+    )
+    suspend fun updatePlaylistFields(
+        playlistId: Long,
+        name: String,
+        description: String?,
+        coverPath: String?
+    )
 }

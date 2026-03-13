@@ -1,16 +1,15 @@
 package com.practicum.playlistmaker.presentation.player
 
-import android.annotation.SuppressLint
 import android.view.LayoutInflater
 import android.view.ViewGroup
-import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.presentation.models.PlaylistUiDto
 
 class PlaylistBottomSheetAdapter(
-    private var playlists: List<PlaylistUiDto>,
     private val onItemClick: (PlaylistUiDto) -> Unit
-) : RecyclerView.Adapter<PlaylistBottomSheetViewHolder>() {
+) : ListAdapter<PlaylistUiDto, PlaylistBottomSheetViewHolder>(DiffCallback()) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PlaylistBottomSheetViewHolder {
         val view = LayoutInflater.from(parent.context)
@@ -19,16 +18,18 @@ class PlaylistBottomSheetAdapter(
     }
 
     override fun onBindViewHolder(holder: PlaylistBottomSheetViewHolder, position: Int) {
-        val playlist = playlists[position]
+        val playlist = getItem(position)
         holder.bind(playlist)
         holder.itemView.setOnClickListener { onItemClick.invoke(playlist) }
     }
 
-    override fun getItemCount(): Int = playlists.size
+    private class DiffCallback : DiffUtil.ItemCallback<PlaylistUiDto>() {
+        override fun areItemsTheSame(oldItem: PlaylistUiDto, newItem: PlaylistUiDto): Boolean {
+            return oldItem.id == newItem.id
+        }
 
-    @SuppressLint("NotifyDataSetChanged")
-    fun submitList(newList: List<PlaylistUiDto>) {
-        playlists = newList
-        notifyDataSetChanged()
+        override fun areContentsTheSame(oldItem: PlaylistUiDto, newItem: PlaylistUiDto): Boolean {
+            return oldItem == newItem
+        }
     }
 }

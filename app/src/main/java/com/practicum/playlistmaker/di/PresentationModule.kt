@@ -12,6 +12,7 @@ import com.practicum.playlistmaker.domain.interactor.search.SearchTracksInteract
 import com.practicum.playlistmaker.presentation.media.favorite.FavoriteTracksViewModel
 import com.practicum.playlistmaker.presentation.media.playlist.PlaylistsViewModel
 import com.practicum.playlistmaker.presentation.media.playlist.CreatePlaylistViewModel
+import com.practicum.playlistmaker.presentation.media.playlist.PlaylistViewModel
 import com.practicum.playlistmaker.presentation.settings.SettingsViewModel
 import org.koin.androidx.viewmodel.dsl.viewModel
 import org.koin.dsl.module
@@ -23,6 +24,12 @@ import com.practicum.playlistmaker.presentation.models.TrackUiDto
 import com.practicum.playlistmaker.domain.interactor.playlist.AddTrackToPlaylistInteractor
 import com.practicum.playlistmaker.domain.interactor.playlist.CreatePlaylistInteractor
 import com.practicum.playlistmaker.domain.interactor.playlist.GetPlaylistsInteractor
+import com.practicum.playlistmaker.domain.interactor.playlist.GetPlaylistInteractor
+import com.practicum.playlistmaker.domain.interactor.playlist.GetPlaylistTracksInteractor
+import com.practicum.playlistmaker.domain.interactor.playlist.RemoveTrackFromPlaylistInteractor
+import com.practicum.playlistmaker.domain.interactor.playlist.RemovePlaylistInteractor
+import com.practicum.playlistmaker.domain.interactor.playlist.UpdatePlaylistInteractor
+import com.practicum.playlistmaker.presentation.models.PlaylistEditUiDto
 
 val presentationModule = module {
 
@@ -72,9 +79,22 @@ val presentationModule = module {
     }
 
     //CreatePlaylistViewModel
-    viewModel {
+    viewModel { (playlist: PlaylistEditUiDto?) ->
         CreatePlaylistViewModel(
-            createPlaylistInteractor = get<CreatePlaylistInteractor>()
+            playlist = playlist,
+            createPlaylistInteractor = get<CreatePlaylistInteractor>(),
+            updatePlaylistInteractor = get<UpdatePlaylistInteractor>()
+        )
+    }
+
+    //PlaylistViewModel
+    viewModel { (playlistId: Long) ->
+        PlaylistViewModel(
+            playlistId = playlistId,
+            getPlaylistInteractor = get<GetPlaylistInteractor>(),
+            getPlaylistTracksInteractor = get<GetPlaylistTracksInteractor>(),
+            removeTrackFromPlaylistInteractor = get<RemoveTrackFromPlaylistInteractor>(),
+            removePlaylistInteractor = get<RemovePlaylistInteractor>()
         )
     }
 

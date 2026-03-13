@@ -411,4 +411,72 @@
         <item name="android:maxLines">1</item>
         <item name="android:ellipsize">end</item>
     </style>
+
+    <!--playlist -->
+    <style name="titlePlaylist">
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="fontFamily">@font/ys_display_bold</item>
+        <item name="android:textSize">24sp</item>
+    </style>
+
+    <style name="descriptionPlaylist">
+        <item name="android:maxLines">1</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:textColor">@color/black</item>
+        <item name="fontFamily">@font/ys_display_regular</item>
+        <item name="android:textSize">18sp</item>
+    </style>
+
+    <style name="PlaylistToolbar">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="titleTextAppearance">@style/SearchToolbarTitleTextAppearance</item>
+    </style>
+
+    <style name="playlistMenuText">
+        <item name="android:textColor">?attr/colorOnSurface</item>
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">@font/ys_display_regular</item>
+    </style>
+
+    <style name="PlaylistToolbarNavButton">
+        <item name="android:background">@android:color/transparent</item>
+        <item name="android:minWidth">48dp</item>
+        <item name="android:minHeight">48dp</item>
+        <item name="android:padding">12dp</item>
+    </style>
+
+    <style name="ThemeOverlay.Playlist.Toolbar" parent="ThemeOverlay.MaterialComponents.Toolbar.Primary">
+        <item name="toolbarNavigationButtonStyle">@style/PlaylistToolbarNavButton</item>
+    </style>
+
+    <style name="ThemeOverlay.Playlist.AlertDialog" parent="ThemeOverlay.MaterialComponents.MaterialAlertDialog">
+        <item name="android:windowBackground">@color/white</item>
+        <item name="backgroundTint">@color/white</item>
+        <item name="colorSurface">@color/white</item>
+        <item name="colorOnSurface">@color/black</item>
+        <item name="elevationOverlayEnabled">false</item>
+        <item name="materialAlertDialogTitleTextStyle">@style/PlaylistDialogTitle</item>
+        <item name="materialAlertDialogBodyTextStyle">@style/PlaylistDialogBody</item>
+        <item name="buttonBarPositiveButtonStyle">@style/PlaylistDialogButton</item>
+        <item name="buttonBarNegativeButtonStyle">@style/PlaylistDialogButton</item>
+    </style>
+
+    <style name="PlaylistDialogTitle" parent="TextAppearance.MaterialComponents.Subtitle1">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="PlaylistDialogBody" parent="TextAppearance.MaterialComponents.Body2">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:textColor">@color/black</item>
+    </style>
+
+    <style name="PlaylistDialogButton" parent="Widget.MaterialComponents.Button.TextButton.Dialog">
+        <item name="android:textColor">@color/blue</item>
+    </style>
 </resources>

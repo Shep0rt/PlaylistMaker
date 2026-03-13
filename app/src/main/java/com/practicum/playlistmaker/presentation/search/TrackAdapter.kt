@@ -7,9 +7,11 @@ import androidx.recyclerview.widget.RecyclerView
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.presentation.models.TrackUiDto
 
-class TrackAdapter(private var tracks: List<TrackUiDto>,
-                   private val onItemClick: ((TrackUiDto) -> Unit)?
-) : RecyclerView.Adapter<TracksViewHolder> (){
+class TrackAdapter(
+    private var tracks: List<TrackUiDto>,
+    private val onItemLongClick: ((TrackUiDto) -> Unit)? = null,
+    private val onItemClick: ((TrackUiDto) -> Unit)?
+) : RecyclerView.Adapter<TracksViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): TracksViewHolder {
         val view = LayoutInflater.from(parent.context).inflate(R.layout.item_track, parent, false)
@@ -31,6 +33,14 @@ class TrackAdapter(private var tracks: List<TrackUiDto>,
             holder.itemView.isClickable = false
             holder.itemView.setOnClickListener(null)
         }
+
+        holder.itemView.setOnLongClickListener(
+            if (onItemLongClick != null) {
+                { onItemLongClick.invoke(track); true }
+            } else {
+                null
+            }
+        )
     }
 
     @SuppressLint("NotifyDataSetChanged")
