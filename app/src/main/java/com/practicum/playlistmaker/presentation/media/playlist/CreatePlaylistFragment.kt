@@ -12,13 +12,20 @@ import android.widget.EditText
 import androidx.activity.addCallback
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.StringRes
 import androidx.core.view.isVisible
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
+import androidx.navigation.fragment.navArgs
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.FragmentCreatePlaylistBinding
 import org.koin.androidx.viewmodel.ext.android.viewModel
+import org.koin.core.parameter.parametersOf
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 class CreatePlaylistFragment : Fragment() {
@@ -26,15 +33,23 @@ class CreatePlaylistFragment : Fragment() {
     private var _binding: FragmentCreatePlaylistBinding? = null
     private val binding get() = _binding!!
 
-    private val viewModel: CreatePlaylistViewModel by viewModel()
+    private val args by navArgs<CreatePlaylistFragmentArgs>()
+    private val viewModel: CreatePlaylistViewModel by viewModel {
+        parametersOf(args.playlist)
+    }
 
     private val pickMedia = registerForActivityResult(
         ActivityResultContracts.PickVisualMedia()
     ) { uri ->
         if (uri != null) {
-            val path = copyToPrivateStorage(uri)
-            viewModel.setCoverPath(path)
-            renderCover(uri)
+            viewLifecycleOwner.lifecycleScope.launch {
+                val context = context ?: return@launch
+                val path = withContext(Dispatchers.IO) {
+                    copyToPrivateStorage(context, uri)
+                } ?: return@launch
+                viewModel.setCoverPath(path)
+                renderCover(uri)
+            }
         }
     }
 
@@ -51,6 +66,7 @@ class CreatePlaylistFragment : Fragment() {
         super.onViewCreated(view, savedInstanceState)
 
         setupToolbar()
+        setupMode()
         setupListeners()
         setupObservers()
         setupBackHandler()
@@ -68,6 +84,13 @@ class CreatePlaylistFragment : Fragment() {
         }
     }
 
+    private fun setupMode() {
+        if (viewModel.isEditMode) {
+            binding.createPlaylistToolbar.title = getString(R.string.playlist_edit_title)
+            binding.createButton.text = getString(R.string.playlist_save_button)
+        }
+    }
+
     private fun setupListeners() = with(binding) {
         coverContainer.setOnClickListener {
             pickMedia.launch(PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly))
@@ -77,46 +100,16 @@ class CreatePlaylistFragment : Fragment() {
             clearFocusAndHideKeyboard()
         }
 
-        nameInput.addTextChangedListener(
-            onTextChanged = { text, _, _, _ ->
-                viewModel.onNameChanged(text?.toString().orEmpty())
-                updateFieldLabel(
-                    editText = nameInput,
-                    label = nameLabel,
-                    hintText = getString(R.string.create_playlist_name_hint)
-                )
-            }
-        )
-
-        descriptionInput.addTextChangedListener(
-            onTextChanged = { text, _, _, _ ->
-                viewModel.onDescriptionChanged(text?.toString().orEmpty())
-                updateFieldLabel(
-                    editText = descriptionInput,
-                    label = descriptionLabel,
-                    hintText = getString(R.string.create_playlist_description_hint)
-                )
-            }
-        )
-
-        nameInput.setOnFocusChangeListener { _, _ ->
-            updateFieldLabel(
-                editText = nameInput,
-                label = nameLabel,
-                hintText = getString(R.string.create_playlist_name_hint)
-            )
+        nameInput.bindFloatingLabel(nameLabel, R.string.create_playlist_name_hint) { value ->
+            viewModel.onNameChanged(value)
         }
 
-        descriptionInput.setOnFocusChangeListener { _, _ ->
-            updateFieldLabel(
-                editText = descriptionInput,
-                label = descriptionLabel,
-                hintText = getString(R.string.create_playlist_description_hint)
-            )
+        descriptionInput.bindFloatingLabel(descriptionLabel, R.string.create_playlist_description_hint) { value ->
+            viewModel.onDescriptionChanged(value)
         }
 
         createButton.setOnClickListener {
-            viewModel.createPlaylist()
+            viewModel.savePlaylist()
         }
     }
 
@@ -125,16 +118,37 @@ class CreatePlaylistFragment : Fragment() {
             binding.createButton.isEnabled = enabled
         }
 
-        viewModel.createdEvent().observe(viewLifecycleOwner) { name ->
-            if (name.isNullOrBlank()) return@observe
+        viewModel.saveEvent().observe(viewLifecycleOwner) { event ->
+            when (event) {
+                is PlaylistSaveEvent.Created -> {
+                    Toast.makeText(
+                        requireContext(),
+                        getString(R.string.create_playlist_created_toast, event.name),
+                        Toast.LENGTH_SHORT
+                    ).show()
+                    findNavController().navigateUp()
+                }
+                PlaylistSaveEvent.Updated -> {
+                    findNavController().navigateUp()
+                }
+                null -> Unit
+            }
+            if (event != null) {
+                viewModel.onSaveEventHandled()
+            }
+        }
 
-            Toast.makeText(
-                requireContext(),
-                getString(R.string.create_playlist_created_toast, name),
-                Toast.LENGTH_SHORT
-            ).show()
-            viewModel.onCreatedEventHandled()
-            findNavController().navigateUp()
+        viewModel.editData().observe(viewLifecycleOwner) { data ->
+            binding.nameInput.setText(data.name)
+            binding.descriptionInput.setText(data.description.orEmpty())
+            binding.nameInput.updateFloatingLabel(binding.nameLabel, R.string.create_playlist_name_hint)
+            binding.descriptionInput.updateFloatingLabel(
+                binding.descriptionLabel,
+                R.string.create_playlist_description_hint
+            )
+            data.coverPath?.let { path ->
+                renderCover(Uri.fromFile(File(path)))
+            }
         }
     }
 
@@ -147,15 +161,10 @@ class CreatePlaylistFragment : Fragment() {
     private fun restoreState() {
         binding.nameInput.setText(viewModel.getName())
         binding.descriptionInput.setText(viewModel.getDescription())
-        updateFieldLabel(
-            editText = binding.nameInput,
-            label = binding.nameLabel,
-            hintText = getString(R.string.create_playlist_name_hint)
-        )
-        updateFieldLabel(
-            editText = binding.descriptionInput,
-            label = binding.descriptionLabel,
-            hintText = getString(R.string.create_playlist_description_hint)
+        binding.nameInput.updateFloatingLabel(binding.nameLabel, R.string.create_playlist_name_hint)
+        binding.descriptionInput.updateFloatingLabel(
+            binding.descriptionLabel,
+            R.string.create_playlist_description_hint
         )
         viewModel.getCoverPath()?.let { path ->
             renderCover(Uri.fromFile(File(path)))
@@ -163,6 +172,10 @@ class CreatePlaylistFragment : Fragment() {
     }
 
     private fun handleBack() {
+        if (viewModel.isEditMode) {
+            findNavController().navigateUp()
+            return
+        }
         if (viewModel.hasUnsavedChanges()) {
             showExitDialog()
         } else {
@@ -195,6 +208,27 @@ class CreatePlaylistFragment : Fragment() {
         editText.hint = if (shouldShow) "" else hintText
     }
 
+    private fun EditText.bindFloatingLabel(
+        label: View,
+        @StringRes hintRes: Int,
+        onValueChanged: (String) -> Unit
+    ) {
+        val hintText = getString(hintRes)
+        addTextChangedListener(
+            onTextChanged = { text, _, _, _ ->
+                onValueChanged(text?.toString().orEmpty())
+                updateFieldLabel(this, label, hintText)
+            }
+        )
+        setOnFocusChangeListener { _, _ ->
+            updateFieldLabel(this, label, hintText)
+        }
+    }
+
+    private fun EditText.updateFloatingLabel(label: View, @StringRes hintRes: Int) {
+        updateFieldLabel(this, label, getString(hintRes))
+    }
+
     private fun clearFocusAndHideKeyboard() {
         binding.nameInput.clearFocus()
         binding.descriptionInput.clearFocus()
@@ -203,10 +237,10 @@ class CreatePlaylistFragment : Fragment() {
         imm.hideSoftInputFromWindow(token, 0)
     }
 
-    private fun copyToPrivateStorage(uri: Uri): String? {
-        val inputStream = requireContext().contentResolver.openInputStream(uri) ?: return null
+    private fun copyToPrivateStorage(context: Context, uri: Uri): String? {
+        val inputStream = context.contentResolver.openInputStream(uri) ?: return null
         val fileName = "playlist_cover_${System.currentTimeMillis()}.jpg"
-        val file = File(requireContext().filesDir, fileName)
+        val file = File(context.filesDir, fileName)
         inputStream.use { input ->
             file.outputStream().use { output ->
                 input.copyTo(output)

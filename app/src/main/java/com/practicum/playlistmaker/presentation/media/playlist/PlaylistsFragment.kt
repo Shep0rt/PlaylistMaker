@@ -12,12 +12,17 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.FragmentPlaylistsBinding
+import com.practicum.playlistmaker.presentation.media.MediaLibraryFragmentDirections
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class PlaylistsFragment : Fragment() {
 
     private val viewModel by viewModel<PlaylistsViewModel>()
-    private val adapter = PlaylistsAdapter(emptyList())
+    private val adapter = PlaylistsAdapter(emptyList()) { playlist ->
+        val action = MediaLibraryFragmentDirections
+            .actionMediaLibraryFragmentToPlaylistFragment(playlist.id)
+        findNavController().navigate(action)
+    }
 
     private var _binding: FragmentPlaylistsBinding? = null
     private val binding get() = _binding!!
@@ -58,10 +63,14 @@ class PlaylistsFragment : Fragment() {
 
     private fun setupListeners() {
         binding.createPlaylistButton.setOnClickListener {
-            findNavController().navigate(R.id.action_mediaLibraryFragment_to_createPlaylistFragment)
+            val action = MediaLibraryFragmentDirections
+                .actionMediaLibraryFragmentToCreatePlaylistFragment(null)
+            findNavController().navigate(action)
         }
         binding.emptyPlaceholder.createPlaylistButton.setOnClickListener {
-            findNavController().navigate(R.id.action_mediaLibraryFragment_to_createPlaylistFragment)
+            val action = MediaLibraryFragmentDirections
+                .actionMediaLibraryFragmentToCreatePlaylistFragment(null)
+            findNavController().navigate(action)
         }
     }
 

@@ -4,6 +4,7 @@
         <item name="colorPrimary">@color/blue</item>
         <item name="colorOnPrimary">@color/black</item>
         <item name="colorOnSecondary">@color/white</item>
+        <item name="colorItemTrack">@color/gray</item>
     </style>
 
     <style name="Theme.PlaylistMaker.Main" parent="Base.Theme.PlaylistMaker">
@@ -29,6 +30,14 @@
     <style name="Theme.PlaylistMaker.MediaLibrary" parent="Base.Theme.PlaylistMaker">
         <item name="colorPrimary">@color/white</item>
         <item name="colorSurface">@color/black</item>
+        <item name="colorItemTrack">@color/gray</item>
+        <item name="colorOutline">@color/light_gray</item>
+    </style>
+
+    <style name="Theme.PlaylistMaker.Playlist" parent="Base.Theme.PlaylistMaker">
+        <item name="colorPrimary">@color/white</item>
+        <item name="colorSurface">@color/black</item>
+        <item name="colorOnSurface">@color/black</item>
         <item name="colorItemTrack">@color/gray</item>
         <item name="colorOutline">@color/light_gray</item>
     </style>

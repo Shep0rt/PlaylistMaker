@@ -22,9 +22,19 @@ import com.practicum.playlistmaker.domain.interactor.impl.theme.SetThemeInteract
 import com.practicum.playlistmaker.domain.interactor.impl.playlist.CreatePlaylistInteractorImpl
 import com.practicum.playlistmaker.domain.interactor.impl.playlist.AddTrackToPlaylistInteractorImpl
 import com.practicum.playlistmaker.domain.interactor.impl.playlist.GetPlaylistsInteractorImpl
+import com.practicum.playlistmaker.domain.interactor.impl.playlist.GetPlaylistInteractorImpl
+import com.practicum.playlistmaker.domain.interactor.impl.playlist.GetPlaylistTracksInteractorImpl
+import com.practicum.playlistmaker.domain.interactor.impl.playlist.RemoveTrackFromPlaylistInteractorImpl
+import com.practicum.playlistmaker.domain.interactor.impl.playlist.RemovePlaylistInteractorImpl
+import com.practicum.playlistmaker.domain.interactor.impl.playlist.UpdatePlaylistInteractorImpl
 import com.practicum.playlistmaker.domain.interactor.playlist.AddTrackToPlaylistInteractor
 import com.practicum.playlistmaker.domain.interactor.playlist.CreatePlaylistInteractor
 import com.practicum.playlistmaker.domain.interactor.playlist.GetPlaylistsInteractor
+import com.practicum.playlistmaker.domain.interactor.playlist.GetPlaylistInteractor
+import com.practicum.playlistmaker.domain.interactor.playlist.GetPlaylistTracksInteractor
+import com.practicum.playlistmaker.domain.interactor.playlist.RemoveTrackFromPlaylistInteractor
+import com.practicum.playlistmaker.domain.interactor.playlist.RemovePlaylistInteractor
+import com.practicum.playlistmaker.domain.interactor.playlist.UpdatePlaylistInteractor
 import com.practicum.playlistmaker.domain.interactor.search.SearchTracksInteractor
 import com.practicum.playlistmaker.domain.interactor.theme.GetThemeInteractor
 import com.practicum.playlistmaker.domain.interactor.theme.SetThemeInteractor
@@ -122,6 +132,36 @@ val domainModule = module {
 
     factory<AddTrackToPlaylistInteractor> {
         AddTrackToPlaylistInteractorImpl(
+            playlistRepository = get<PlaylistRepository>()
+        )
+    }
+
+    factory<GetPlaylistInteractor> {
+        GetPlaylistInteractorImpl(
+            playlistRepository = get<PlaylistRepository>()
+        )
+    }
+
+    factory<GetPlaylistTracksInteractor> {
+        GetPlaylistTracksInteractorImpl(
+            playlistRepository = get<PlaylistRepository>()
+        )
+    }
+
+    factory<RemoveTrackFromPlaylistInteractor> {
+        RemoveTrackFromPlaylistInteractorImpl(
+            playlistRepository = get<PlaylistRepository>()
+        )
+    }
+
+    factory<RemovePlaylistInteractor> {
+        RemovePlaylistInteractorImpl(
+            playlistRepository = get<PlaylistRepository>()
+        )
+    }
+
+    factory<UpdatePlaylistInteractor> {
+        UpdatePlaylistInteractorImpl(
             playlistRepository = get<PlaylistRepository>()
         )
     }

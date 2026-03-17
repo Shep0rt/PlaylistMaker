@@ -94,6 +94,7 @@ val dataModule = module {
             playlistDao = get(),
             playlistTrackDao = get(),
             trackDao = get(),
+            favoriteTrackDao = get(),
             playlistDbMapper = get(),
             trackDbMapper = get()
         )

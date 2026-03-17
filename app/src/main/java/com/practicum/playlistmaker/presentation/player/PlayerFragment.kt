@@ -33,7 +33,7 @@ class PlayerFragment : Fragment() {
     }
 
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
-    private val playlistsAdapter = PlaylistBottomSheetAdapter(emptyList()) { playlist ->
+    private val playlistsAdapter = PlaylistBottomSheetAdapter { playlist ->
         viewModel.onAddToPlaylistClicked(playlist)
     }
 
@@ -152,7 +152,9 @@ class PlayerFragment : Fragment() {
 
         binding.bottomSheetNewPlaylistButton.setOnClickListener {
             bottomSheetBehavior.state = BottomSheetBehavior.STATE_HIDDEN
-            findNavController().navigate(R.id.action_playerFragment_to_createPlaylistFragment)
+            val action = PlayerFragmentDirections
+                .actionPlayerFragmentToCreatePlaylistFragment(null)
+            findNavController().navigate(action)
         }
     }
 
