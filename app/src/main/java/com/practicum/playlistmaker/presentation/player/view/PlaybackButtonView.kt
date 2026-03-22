@@ -1,6 +1,5 @@
 package com.practicum.playlistmaker.presentation.player.view
 
-import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
@@ -25,6 +24,8 @@ class PlaybackButtonView @JvmOverloads constructor(
     private var pauseBitmap: Bitmap? = null
     private var isPlaying = false
     private var tintColor: Int? = null
+    private val playRect = RectF()
+    private val pauseRect = RectF()
 
     init {
         isClickable = true
@@ -55,26 +56,11 @@ class PlaybackButtonView @JvmOverloads constructor(
         invalidate()
     }
 
-    @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
         val bitmap = if (isPlaying) pauseBitmap else playBitmap
-        if (bitmap == null) return
-
-        val availableWidth = width - paddingLeft - paddingRight
-        val availableHeight = height - paddingTop - paddingBottom
-        if (availableWidth <= 0 || availableHeight <= 0) return
-
-        val scale = min(
-            availableWidth.toFloat() / bitmap.width,
-            availableHeight.toFloat() / bitmap.height
-        )
-        val scaledWidth = bitmap.width * scale
-        val scaledHeight = bitmap.height * scale
-        val left = paddingLeft + (availableWidth - scaledWidth) / 2f
-        val top = paddingTop + (availableHeight - scaledHeight) / 2f
-        val dest = RectF(left, top, left + scaledWidth, top + scaledHeight)
-
+        val dest = if (isPlaying) pauseRect else playRect
+        if (bitmap == null || dest.isEmpty) return
         canvas.drawBitmap(bitmap, null, dest, null)
     }
 
@@ -105,6 +91,12 @@ class PlaybackButtonView @JvmOverloads constructor(
         setMeasuredDimension(measuredWidth, measuredHeight)
     }
 
+    override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
+        super.onSizeChanged(w, h, oldw, oldh)
+        updateRect(playBitmap, playRect, w, h)
+        updateRect(pauseBitmap, pauseRect, w, h)
+    }
+
     private fun toggleState() {
         isPlaying = !isPlaying
         invalidate()
@@ -122,6 +114,28 @@ class PlaybackButtonView @JvmOverloads constructor(
         wrapped.setBounds(0, 0, width, height)
         wrapped.draw(canvas)
         return bitmap
+    }
+
+    private fun updateRect(bitmap: Bitmap?, rect: RectF, width: Int, height: Int) {
+        if (bitmap == null) {
+            rect.setEmpty()
+            return
+        }
+        val availableWidth = width - paddingLeft - paddingRight
+        val availableHeight = height - paddingTop - paddingBottom
+        if (availableWidth <= 0 || availableHeight <= 0) {
+            rect.setEmpty()
+            return
+        }
+        val scale = min(
+            availableWidth.toFloat() / bitmap.width,
+            availableHeight.toFloat() / bitmap.height
+        )
+        val scaledWidth = bitmap.width * scale
+        val scaledHeight = bitmap.height * scale
+        val left = paddingLeft + (availableWidth - scaledWidth) / 2f
+        val top = paddingTop + (availableHeight - scaledHeight) / 2f
+        rect.set(left, top, left + scaledWidth, top + scaledHeight)
     }
 
 }
