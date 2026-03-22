@@ -85,10 +85,9 @@ class CreatePlaylistFragment : Fragment() {
     }
 
     private fun setupMode() {
-        if (viewModel.isEditMode) {
-            binding.createPlaylistToolbar.title = getString(R.string.playlist_edit_title)
-            binding.createButton.text = getString(R.string.playlist_save_button)
-        }
+        if (!viewModel.isEditMode) return
+        binding.createPlaylistToolbar.title = getString(R.string.playlist_edit_title)
+        binding.createButton.text = getString(R.string.playlist_save_button)
     }
 
     private fun setupListeners() = with(binding) {
@@ -135,19 +134,6 @@ class CreatePlaylistFragment : Fragment() {
             }
             if (event != null) {
                 viewModel.onSaveEventHandled()
-            }
-        }
-
-        viewModel.editData().observe(viewLifecycleOwner) { data ->
-            binding.nameInput.setText(data.name)
-            binding.descriptionInput.setText(data.description.orEmpty())
-            binding.nameInput.updateFloatingLabel(binding.nameLabel, R.string.create_playlist_name_hint)
-            binding.descriptionInput.updateFloatingLabel(
-                binding.descriptionLabel,
-                R.string.create_playlist_description_hint
-            )
-            data.coverPath?.let { path ->
-                renderCover(Uri.fromFile(File(path)))
             }
         }
     }

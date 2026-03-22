@@ -95,12 +95,7 @@ class PlayerFragment : Fragment() {
     private fun setupObservers() {
         viewModel.uiState.observe(viewLifecycleOwner) { state ->
             binding.play.isEnabled = state.playerState != PlayerState.Default
-            binding.play.setImageResource(
-                if (state.playerState == PlayerState.Playing)
-                    R.drawable.ic_button_pause100
-                else
-                    R.drawable.ic_button_play100
-            )
+            binding.play.setPlaying(state.playerState == PlayerState.Playing)
             binding.durationTrack.text = state.progress
             
             binding.like.setImageResource(
