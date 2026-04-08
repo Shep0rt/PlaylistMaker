@@ -1,4 +1,13 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <attr name="colorItemTrack" format="color" />
+    <attr name="playImage" format="reference" />
+    <attr name="pauseImage" format="reference" />
+    <attr name="playbackTint" format="color|reference" />
+
+    <declare-styleable name="PlaybackButtonView">
+        <attr name="playImage" />
+        <attr name="pauseImage" />
+        <attr name="playbackTint" />
+    </declare-styleable>
 </resources>

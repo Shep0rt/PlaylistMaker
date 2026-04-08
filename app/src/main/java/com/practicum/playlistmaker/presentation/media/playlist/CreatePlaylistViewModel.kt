@@ -21,9 +21,6 @@ class CreatePlaylistViewModel(
     private val saveEvent = MutableLiveData<PlaylistSaveEvent?>()
     fun saveEvent(): LiveData<PlaylistSaveEvent?> = saveEvent
 
-    private val editData = MutableLiveData<PlaylistEditUiDto>()
-    fun editData(): LiveData<PlaylistEditUiDto> = editData
-
     private val editPlaylistId: Long = playlist?.id ?: 0L
     val isEditMode: Boolean = playlist != null
 
@@ -93,6 +90,5 @@ class CreatePlaylistViewModel(
         description = playlist.description.orEmpty()
         coverPath = playlist.coverPath
         isCreateEnabled.value = name.isNotBlank()
-        editData.value = playlist
     }
 }

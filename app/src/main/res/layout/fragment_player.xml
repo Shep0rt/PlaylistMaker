@@ -87,21 +87,21 @@
             style="?attr/materialIconButtonStyle"
             android:background="?attr/selectableItemBackgroundBorderless" />
 
-        <ImageButton
+        <com.practicum.playlistmaker.presentation.player.view.PlaybackButtonView
             android:id="@+id/play"
             android:layout_width="100dp"
             android:layout_height="100dp"
             android:layout_marginTop="30dp"
+            android:background="?attr/selectableItemBackgroundBorderless"
             android:contentDescription="@null"
             android:enabled="false"
-            android:src="@drawable/ic_button_play100"
-            app:tint="?attr/colorOnSurface"
+            app:playbackTint="?attr/colorOnSurface"
+            app:playImage="@drawable/ic_button_play100"
+            app:pauseImage="@drawable/ic_button_pause100"
             app:layout_constraintTop_toBottomOf="@id/artist"
             app:layout_constraintStart_toEndOf="@id/addPlaylist"
             app:layout_constraintEnd_toStartOf="@id/like"
-            app:layout_constraintBottom_toTopOf="@id/durationTrack"
-            style="?attr/materialIconButtonStyle"
-            android:background="?attr/selectableItemBackgroundBorderless" />
+            app:layout_constraintBottom_toTopOf="@id/durationTrack" />
 
         <ImageButton
             android:id="@+id/like"
