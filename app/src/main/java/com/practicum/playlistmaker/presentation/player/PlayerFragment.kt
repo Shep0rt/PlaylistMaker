@@ -1,11 +1,23 @@
 package com.practicum.playlistmaker.presentation.player
 
+import android.Manifest
+import android.content.ComponentName
+import android.content.Context
+import android.content.Intent
+import android.content.IntentFilter
+import android.content.ServiceConnection
+import android.content.pm.PackageManager
+import android.net.ConnectivityManager
+import android.os.Build
 import android.os.Bundle
+import android.os.IBinder
 import android.util.TypedValue
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
@@ -18,6 +30,8 @@ import com.google.android.material.bottomsheet.BottomSheetBehavior
 import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.FragmentPlayerBinding
 import com.practicum.playlistmaker.presentation.models.TrackUiDto
+import com.practicum.playlistmaker.presentation.player.service.PlayerPlaybackService
+import com.practicum.playlistmaker.util.InternetConnectionReceiver
 import org.koin.androidx.viewmodel.ext.android.viewModel
 import org.koin.core.parameter.parametersOf
 
@@ -35,6 +49,28 @@ class PlayerFragment : Fragment() {
     private lateinit var bottomSheetBehavior: BottomSheetBehavior<View>
     private val playlistsAdapter = PlaylistBottomSheetAdapter { playlist ->
         viewModel.onAddToPlaylistClicked(playlist)
+    }
+
+    private var isInternetReceiverRegistered = false
+    private val internetReceiver = InternetConnectionReceiver { context ->
+        showNoInternetToast(context)
+    }
+
+    private val notificationPermissionLauncher =
+        registerForActivityResult(ActivityResultContracts.RequestPermission()) { _ -> }
+
+    private var isServiceBound = false
+    private val playerServiceConnection = object : ServiceConnection {
+        override fun onServiceConnected(name: ComponentName?, service: IBinder?) {
+            val binder = service as? PlayerPlaybackService.PlayerPlaybackBinder ?: return
+            viewModel.onServiceConnected(binder.getService())
+            isServiceBound = true
+        }
+
+        override fun onServiceDisconnected(name: ComponentName?) {
+            isServiceBound = false
+            viewModel.onServiceDisconnected()
+        }
     }
 
     private val bottomSheetCallback = object : BottomSheetBehavior.BottomSheetCallback() {
@@ -66,6 +102,8 @@ class PlayerFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
+        requestNotificationPermissionIfNeeded()
+        bindPlayerService()
         bindTrack(track)
         setupBottomSheet()
         setupObservers()
@@ -74,17 +112,30 @@ class PlayerFragment : Fragment() {
 
     override fun onStart() {
         super.onStart()
+        viewModel.onPlayerScreenStarted()
         if (::bottomSheetBehavior.isInitialized) {
             syncBottomSheetOverlay()
         }
     }
 
+    override fun onResume() {
+        super.onResume()
+        internetReceiver.resetInitialState(requireContext())
+        registerInternetReceiver()
+    }
+
     override fun onPause() {
+        unregisterInternetReceiver()
         super.onPause()
-        viewModel.onPause()
+    }
+
+    override fun onStop() {
+        viewModel.onPlayerScreenStopped(canShowNotifications())
+        super.onStop()
     }
 
     override fun onDestroyView() {
+        unbindPlayerService()
         super.onDestroyView()
         if (::bottomSheetBehavior.isInitialized) {
             bottomSheetBehavior.removeBottomSheetCallback(bottomSheetCallback)
@@ -224,5 +275,69 @@ class PlayerFragment : Fragment() {
 
     private fun showToast(message: String) {
         Toast.makeText(requireContext(), message, Toast.LENGTH_SHORT).show()
+    }
+
+    private fun registerInternetReceiver() {
+        if (isInternetReceiverRegistered) return
+        ContextCompat.registerReceiver(
+            requireContext(),
+            internetReceiver,
+            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+        isInternetReceiverRegistered = true
+    }
+
+    private fun unregisterInternetReceiver() {
+        if (!isInternetReceiverRegistered) return
+        try {
+            requireContext().unregisterReceiver(internetReceiver)
+        } catch (_: IllegalArgumentException) {
+        } finally {
+            isInternetReceiverRegistered = false
+        }
+    }
+
+    private fun showNoInternetToast(context: Context) {
+        Toast.makeText(
+            context,
+            context.getString(R.string.no_internet_connection),
+            Toast.LENGTH_SHORT
+        ).show()
+    }
+
+    private fun bindPlayerService() {
+        if (isServiceBound) return
+        val intent = Intent(requireContext(), PlayerPlaybackService::class.java).apply {
+            putExtra(PlayerPlaybackService.EXTRA_PREVIEW_URL, track.previewUrl)
+            putExtra(PlayerPlaybackService.EXTRA_ARTIST_NAME, track.artistName)
+            putExtra(PlayerPlaybackService.EXTRA_TRACK_NAME, track.trackName)
+        }
+        requireContext().bindService(intent, playerServiceConnection, Context.BIND_AUTO_CREATE)
+    }
+
+    private fun unbindPlayerService() {
+        if (!isServiceBound) return
+        try {
+            requireContext().unbindService(playerServiceConnection)
+        } catch (_: IllegalArgumentException) {
+        } finally {
+            isServiceBound = false
+            viewModel.onServiceDisconnected()
+        }
+    }
+
+    private fun canShowNotifications(): Boolean {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return true
+        return ContextCompat.checkSelfPermission(
+            requireContext(),
+            Manifest.permission.POST_NOTIFICATIONS
+        ) == PackageManager.PERMISSION_GRANTED
+    }
+
+    private fun requestNotificationPermissionIfNeeded() {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) return
+        if (canShowNotifications()) return
+        notificationPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
     }
 }

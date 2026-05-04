@@ -1,6 +1,5 @@
 package com.practicum.playlistmaker.presentation.player
 
-import android.media.MediaPlayer
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -16,15 +15,14 @@ import com.practicum.playlistmaker.presentation.models.OptionalField
 import com.practicum.playlistmaker.presentation.models.PlayerUiState
 import com.practicum.playlistmaker.presentation.models.PlaylistUiDto
 import com.practicum.playlistmaker.presentation.models.TrackUiDto
+import com.practicum.playlistmaker.presentation.player.service.PlayerPlaybackState
+import com.practicum.playlistmaker.presentation.player.service.PlayerServiceApi
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
-import java.util.Locale
 
 class PlayerViewModel(
     private val track: TrackUiDto,
-    private val mediaPlayer: MediaPlayer,
     private val addTrackToFavoritesInteractor: AddTrackToFavoritesInteractor,
     private val removeTrackFromFavoritesInteractor: RemoveTrackFromFavoritesInteractor,
     private val isFavoriteTrackInteractor: IsFavoriteTrackInteractor,
@@ -47,30 +45,38 @@ class PlayerViewModel(
     private val addToPlaylistState = MutableLiveData<AddToPlaylistUiState?>(null)
     val addToPlaylistResult: LiveData<AddToPlaylistUiState?> = addToPlaylistState
 
-    private var timerJob: Job? = null
+    private var playerService: PlayerServiceApi? = null
+    private var playerStateJob: Job? = null
 
     init {
-        preparePlayer()
         checkFavoriteStatus()
         observePlaylists()
     }
 
     override fun onCleared() {
         super.onCleared()
-        mediaPlayer.release()
-        timerJob?.cancel()
+        playerStateJob?.cancel()
     }
 
     fun onPlayButtonClicked() {
-        when (state.value?.playerState) {
-            PlayerState.Playing -> pausePlayer()
-            PlayerState.Prepared, PlayerState.Paused -> startPlayer()
+        val service = playerService ?: return
+        when (service.getPlayerState()) {
+            PlayerState.Playing -> service.pause()
+            PlayerState.Prepared, PlayerState.Paused -> service.play()
             else -> {}
         }
     }
 
-    fun onPause() {
-        pausePlayer()
+    fun onPlayerScreenStarted() {
+        playerService?.stopForegroundMode()
+    }
+
+    fun onPlayerScreenStopped(canShowNotification: Boolean) {
+        if (!canShowNotification) return
+        val service = playerService ?: return
+        if (service.getPlayerState() == PlayerState.Playing) {
+            service.startForegroundMode()
+        }
     }
 
     fun onFavoriteButtonClicked() {
@@ -135,14 +141,6 @@ class PlayerViewModel(
         state.value = transform(current)
     }
 
-    private fun setPlayerState(state: PlayerState) {
-        updateState { it.copy(playerState = state) }
-    }
-
-    private fun setProgress(progress: String) {
-        updateState { it.copy(progress = progress) }
-    }
-
     fun isoToYear(iso: String?): String? =
         iso?.takeIf { it.length >= 4 }?.substring(0, 4)
 
@@ -159,47 +157,27 @@ class PlayerViewModel(
         )
     }
 
-    private fun preparePlayer() {
-        mediaPlayer.setDataSource(track.previewUrl)
-        mediaPlayer.prepareAsync()
-        mediaPlayer.setOnPreparedListener {
-            setPlayerState(PlayerState.Prepared)
+    fun onServiceConnected(service: PlayerServiceApi) {
+        playerService = service
+        playerStateJob?.cancel()
+        playerStateJob = viewModelScope.launch {
+            service.playbackState().collectLatest(::onPlaybackStateChanged)
         }
-        mediaPlayer.setOnCompletionListener {
-            timerJob?.cancel()
-            mediaPlayer.seekTo(0)
-            updateState {
-                it.copy(
-                    playerState = PlayerState.Prepared,
-                    progress = PlayerConstants.DEFAULT_POSITION_TRACK
-                )
-            }
+        service.stopForegroundMode()
+    }
+
+    fun onServiceDisconnected() {
+        playerStateJob?.cancel()
+        playerStateJob = null
+        playerService = null
+    }
+
+    private fun onPlaybackStateChanged(serviceState: PlayerPlaybackState) {
+        updateState {
+            it.copy(
+                playerState = serviceState.playerState,
+                progress = serviceState.progress
+            )
         }
-    }
-
-    private fun startPlayer() {
-        mediaPlayer.start()
-        setPlayerState(PlayerState.Playing)
-        startTimer()
-    }
-
-    private fun pausePlayer() {
-        mediaPlayer.pause()
-        setPlayerState(PlayerState.Paused)
-        timerJob?.cancel()
-    }
-
-    private fun startTimer() {
-        timerJob?.cancel()
-        timerJob = viewModelScope.launch {
-            while (state.value?.playerState == PlayerState.Playing) {
-                delay(PlayerConstants.DELAY_REFRESH_DURATION_TRACK)
-                setProgress(formatTime(mediaPlayer.currentPosition))
-            }
-        }
-    }
-
-    private fun formatTime(time: Int): String {
-        return SimpleDateFormat("m:ss", Locale.getDefault()).format(time)
     }
 }

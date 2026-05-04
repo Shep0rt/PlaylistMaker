@@ -1,9 +1,11 @@
 package com.practicum.playlistmaker.presentation.player.view
 
+import android.annotation.SuppressLint
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Canvas
+import android.graphics.Rect
 import android.graphics.RectF
+import android.graphics.drawable.Drawable
 import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
@@ -12,7 +14,7 @@ import com.practicum.playlistmaker.R
 import androidx.core.content.withStyledAttributes
 import androidx.core.graphics.drawable.DrawableCompat
 import kotlin.math.min
-import androidx.core.graphics.createBitmap
+import kotlin.math.roundToInt
 
 class PlaybackButtonView @JvmOverloads constructor(
     context: Context,
@@ -20,8 +22,8 @@ class PlaybackButtonView @JvmOverloads constructor(
     defStyleAttr: Int = 0
 ) : View(context, attrs, defStyleAttr) {
 
-    private var playBitmap: Bitmap? = null
-    private var pauseBitmap: Bitmap? = null
+    private var playDrawable: Drawable? = null
+    private var pauseDrawable: Drawable? = null
     private var isPlaying = false
     private var tintColor: Int? = null
     private val playRect = RectF()
@@ -45,8 +47,8 @@ class PlaybackButtonView @JvmOverloads constructor(
             )
             tintColor = getColor(R.styleable.PlaybackButtonView_playbackTint, 0)
                 .takeIf { hasValue(R.styleable.PlaybackButtonView_playbackTint) }
-            playBitmap = loadBitmap(playResId)
-            pauseBitmap = loadBitmap(pauseResId)
+            playDrawable = loadDrawable(playResId)
+            pauseDrawable = loadDrawable(pauseResId)
         }
     }
 
@@ -56,12 +58,20 @@ class PlaybackButtonView @JvmOverloads constructor(
         invalidate()
     }
 
+    @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas) {
         super.onDraw(canvas)
-        val bitmap = if (isPlaying) pauseBitmap else playBitmap
+        val drawable = if (isPlaying) pauseDrawable else playDrawable
         val dest = if (isPlaying) pauseRect else playRect
-        if (bitmap == null || dest.isEmpty) return
-        canvas.drawBitmap(bitmap, null, dest, null)
+        if (drawable == null || dest.isEmpty) return
+
+        drawable.bounds = Rect(
+            dest.left.roundToInt(),
+            dest.top.roundToInt(),
+            dest.right.roundToInt(),
+            dest.bottom.roundToInt()
+        )
+        drawable.draw(canvas)
     }
 
     override fun onTouchEvent(event: MotionEvent): Boolean {
@@ -83,9 +93,9 @@ class PlaybackButtonView @JvmOverloads constructor(
     }
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
-        val bitmap = playBitmap ?: pauseBitmap
-        val desiredWidth = (bitmap?.width ?: 0) + paddingLeft + paddingRight
-        val desiredHeight = (bitmap?.height ?: 0) + paddingTop + paddingBottom
+        val drawable = playDrawable ?: pauseDrawable
+        val desiredWidth = (drawable?.intrinsicWidth?.takeIf { it > 0 } ?: 0) + paddingLeft + paddingRight
+        val desiredHeight = (drawable?.intrinsicHeight?.takeIf { it > 0 } ?: 0) + paddingTop + paddingBottom
         val measuredWidth = resolveSize(desiredWidth, widthMeasureSpec)
         val measuredHeight = resolveSize(desiredHeight, heightMeasureSpec)
         setMeasuredDimension(measuredWidth, measuredHeight)
@@ -93,8 +103,8 @@ class PlaybackButtonView @JvmOverloads constructor(
 
     override fun onSizeChanged(w: Int, h: Int, oldw: Int, oldh: Int) {
         super.onSizeChanged(w, h, oldw, oldh)
-        updateRect(playBitmap, playRect, w, h)
-        updateRect(pauseBitmap, pauseRect, w, h)
+        updateRect(playDrawable, playRect, w, h)
+        updateRect(pauseDrawable, pauseRect, w, h)
     }
 
     private fun toggleState() {
@@ -102,22 +112,16 @@ class PlaybackButtonView @JvmOverloads constructor(
         invalidate()
     }
 
-    private fun loadBitmap(resId: Int): Bitmap? {
+    private fun loadDrawable(resId: Int): Drawable? {
         if (resId == 0) return null
         val drawable = AppCompatResources.getDrawable(context, resId)?.mutate() ?: return null
         val wrapped = DrawableCompat.wrap(drawable)
         tintColor?.let { DrawableCompat.setTint(wrapped, it) }
-        val width = if (drawable.intrinsicWidth > 0) drawable.intrinsicWidth else 1
-        val height = if (drawable.intrinsicHeight > 0) drawable.intrinsicHeight else 1
-        val bitmap = createBitmap(width, height)
-        val canvas = Canvas(bitmap)
-        wrapped.setBounds(0, 0, width, height)
-        wrapped.draw(canvas)
-        return bitmap
+        return wrapped
     }
 
-    private fun updateRect(bitmap: Bitmap?, rect: RectF, width: Int, height: Int) {
-        if (bitmap == null) {
+    private fun updateRect(drawable: Drawable?, rect: RectF, width: Int, height: Int) {
+        if (drawable == null) {
             rect.setEmpty()
             return
         }
@@ -127,12 +131,14 @@ class PlaybackButtonView @JvmOverloads constructor(
             rect.setEmpty()
             return
         }
+        val drawableWidth = drawable.intrinsicWidth.takeIf { it > 0 } ?: 1
+        val drawableHeight = drawable.intrinsicHeight.takeIf { it > 0 } ?: 1
         val scale = min(
-            availableWidth.toFloat() / bitmap.width,
-            availableHeight.toFloat() / bitmap.height
+            availableWidth.toFloat() / drawableWidth,
+            availableHeight.toFloat() / drawableHeight
         )
-        val scaledWidth = bitmap.width * scale
-        val scaledHeight = bitmap.height * scale
+        val scaledWidth = drawableWidth * scale
+        val scaledHeight = drawableHeight * scale
         val left = paddingLeft + (availableWidth - scaledWidth) / 2f
         val top = paddingTop + (availableHeight - scaledHeight) / 2f
         rect.set(left, top, left + scaledWidth, top + scaledHeight)

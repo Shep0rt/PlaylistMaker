@@ -1,5 +1,8 @@
 package com.practicum.playlistmaker.presentation.search
 
+import android.content.Context
+import android.content.IntentFilter
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.text.Editable
 import android.text.TextWatcher
@@ -8,11 +11,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.EditorInfo
 import android.view.inputmethod.InputMethodManager
+import android.widget.Toast
+import androidx.core.content.ContextCompat
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.navigation.fragment.findNavController
+import com.practicum.playlistmaker.R
 import com.practicum.playlistmaker.databinding.FragmentSearchBinding
 import com.practicum.playlistmaker.presentation.models.TrackUiDto
+import com.practicum.playlistmaker.util.InternetConnectionReceiver
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SearchFragment : Fragment() {
@@ -24,6 +31,11 @@ class SearchFragment : Fragment() {
 
     private lateinit var searchAdapter: TrackAdapter
     private lateinit var historyAdapter: TrackAdapter
+
+    private var isInternetReceiverRegistered = false
+    private val internetReceiver = InternetConnectionReceiver { context ->
+        showNoInternetToast(context)
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -41,6 +53,17 @@ class SearchFragment : Fragment() {
         setupListeners()
 
         viewModel.searchState.observe(viewLifecycleOwner) { state -> renderState(state) }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        internetReceiver.resetInitialState(requireContext())
+        registerInternetReceiver()
+    }
+
+    override fun onPause() {
+        unregisterInternetReceiver()
+        super.onPause()
     }
 
     override fun onDestroyView() {
@@ -175,7 +198,36 @@ class SearchFragment : Fragment() {
     }
 
     private fun hideKeyboard() {
-        val imm = requireActivity().getSystemService(android.content.Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        val imm = requireActivity().getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
         imm.hideSoftInputFromWindow(binding.searchEditText.windowToken, 0)
+    }
+
+    private fun registerInternetReceiver() {
+        if (isInternetReceiverRegistered) return
+        ContextCompat.registerReceiver(
+            requireContext(),
+            internetReceiver,
+            IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION),
+            ContextCompat.RECEIVER_NOT_EXPORTED
+        )
+        isInternetReceiverRegistered = true
+    }
+
+    private fun unregisterInternetReceiver() {
+        if (!isInternetReceiverRegistered) return
+        try {
+            requireContext().unregisterReceiver(internetReceiver)
+        } catch (_: IllegalArgumentException) {
+        } finally {
+            isInternetReceiverRegistered = false
+        }
+    }
+
+    private fun showNoInternetToast(context: Context) {
+        Toast.makeText(
+            context,
+            context.getString(R.string.no_internet_connection),
+            Toast.LENGTH_SHORT
+        ).show()
     }
 }

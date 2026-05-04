@@ -59,4 +59,5 @@
     <string name="playlist_save_button">Сохранить</string>
     <string name="dialog_no">НЕТ</string>
     <string name="dialog_yes">ДА</string>
+    <string name="no_internet_connection">Отсутствует подключение к интернету</string>
 </resources>
