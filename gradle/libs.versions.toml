@@ -21,6 +21,8 @@ fragmentKtx = "1.5.6"
 kotlinxCoroutines = "1.10.2"
 room = "2.8.4"
 ksp = "2.3.4"
+composeBom = "2025.05.01"
+coilCompose = "2.7.0"
 
 [libraries]
 
@@ -32,6 +34,17 @@ androidx-appcompat = { group = "androidx.appcompat", name = "appcompat", version
 material = { group = "com.google.android.material", name = "material", version.ref = "material" }
 androidx-activity = { group = "androidx.activity", name = "activity", version.ref = "activity" }
 androidx-constraintlayout = { group = "androidx.constraintlayout", name = "constraintlayout", version.ref = "constraintlayout" }
+
+# COMPOSE
+androidx-compose-bom = { group = "androidx.compose", name = "compose-bom", version.ref = "composeBom" }
+androidx-compose-ui = { group = "androidx.compose.ui", name = "ui" }
+androidx-compose-foundation = { group = "androidx.compose.foundation", name = "foundation" }
+androidx-compose-material3 = { group = "androidx.compose.material3", name = "material3" }
+androidx-compose-runtime-livedata = { group = "androidx.compose.runtime", name = "runtime-livedata" }
+androidx-compose-ui-tooling = { group = "androidx.compose.ui", name = "ui-tooling" }
+androidx-compose-ui-tooling-preview = { group = "androidx.compose.ui", name = "ui-tooling-preview" }
+androidx-activity-compose = { group = "androidx.activity", name = "activity-compose", version.ref = "activity" }
+coil-compose = { group = "io.coil-kt", name = "coil-compose", version.ref = "coilCompose" }
 
 #GLIDE
 glide = { group = "com.github.bumptech.glide", name = "glide", version.ref = "glide" }
@@ -71,4 +84,5 @@ androidx-room-compiler = { group = "androidx.room", name = "room-compiler", vers
 
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
+kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }

@@ -10,6 +10,8 @@
     <dimen name="settings_text_size_title">22sp</dimen>
     <dimen name="list_item_margin_top">42dp</dimen>
     <dimen name="setting_text_size">16sp</dimen>
+    <dimen name="settings_row_height">61dp</dimen>
+    <dimen name="settings_toolbar_margin_bottom">24dp</dimen>
     <dimen name="material_padding_start">16dp</dimen>
     <dimen name="material_padding_end">12dp</dimen>
     <dimen name="material_padding_top">21dp</dimen>
@@ -52,12 +54,10 @@
     <dimen name="padding_horizontal_clear_history_button">14dp</dimen>
     <dimen name="padding_vertical_clear_history_button">8dp</dimen>
     <dimen name="search_history_clear_button_text_size">14sp</dimen>
-
     <!--activity_media_library Избранные треки -->
     <dimen name="media_library_text_size_title">22sp</dimen>
     <dimen name="media_library_empty_size_text">19sp</dimen>
     <dimen name="media_library_no_playlist_text">19sp</dimen>
-
     <!--activity_media_library Плейлисты-->
     <dimen name="margin_start_new_playlist_button">113dp</dimen>
     <dimen name="margin_end_new_playlist_button">114dp</dimen>
@@ -65,4 +65,7 @@
     <dimen name="padding_vertical_new_playlist_button">10dp</dimen>
     <dimen name="playlist_grid_spacing">8dp</dimen>
     <dimen name="playlist_bottom_sheet_offset">24dp</dimen>
+    <dimen name="media_library_playlists_button_margin_top">24dp</dimen>
+    <dimen name="media_library_no_playlists_image_margin_top">46dp</dimen>
+    <dimen name="media_library_placeholder_text_margin_top">16dp</dimen>
 </resources>

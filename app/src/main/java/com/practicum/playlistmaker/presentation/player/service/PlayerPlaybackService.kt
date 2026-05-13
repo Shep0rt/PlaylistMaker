@@ -8,10 +8,12 @@ import android.content.Intent
 import android.content.pm.ServiceInfo
 import android.media.MediaPlayer
 import android.os.Binder
+import android.os.Build
 import android.os.IBinder
 import androidx.core.app.NotificationCompat
 import androidx.core.app.ServiceCompat
 import com.practicum.playlistmaker.R
+import com.practicum.playlistmaker.presentation.models.TrackUiDto
 import com.practicum.playlistmaker.presentation.player.PlayerConstants
 import com.practicum.playlistmaker.presentation.player.PlayerState
 import com.practicum.playlistmaker.presentation.root.RootActivity
@@ -30,28 +32,17 @@ import java.util.Locale
 
 class PlayerPlaybackService : Service(), PlayerServiceApi {
 
-    inner class PlayerPlaybackBinder : Binder() {
-        fun getService(): PlayerPlaybackService = this@PlayerPlaybackService
-    }
-
-    companion object {
-        const val EXTRA_PREVIEW_URL = "extra_preview_url"
-        const val EXTRA_ARTIST_NAME = "extra_artist_name"
-        const val EXTRA_TRACK_NAME = "extra_track_name"
-
-        private const val NOTIFICATION_CHANNEL_ID = "playlist_maker_playback"
-        private const val NOTIFICATION_ID = 1001
-    }
-
     private val binder = PlayerPlaybackBinder()
 
     private val serviceScope = CoroutineScope(SupervisorJob() + Dispatchers.Main.immediate)
     private var timerJob: Job? = null
 
+    private val dateFormat by lazy(LazyThreadSafetyMode.NONE) {
+        SimpleDateFormat("mm:ss", Locale.getDefault())
+    }
+
     private var mediaPlayer: MediaPlayer? = null
-    private var previewUrl: String? = null
-    private var artistName: String = ""
-    private var trackName: String = ""
+    private var track: TrackUiDto? = null
 
     private val _state = MutableStateFlow(PlayerPlaybackState())
     private val state: StateFlow<PlayerPlaybackState> = _state.asStateFlow()
@@ -64,9 +55,7 @@ class PlayerPlaybackService : Service(), PlayerServiceApi {
     }
 
     override fun onBind(intent: Intent?): IBinder {
-        previewUrl = intent?.getStringExtra(EXTRA_PREVIEW_URL)
-        artistName = intent?.getStringExtra(EXTRA_ARTIST_NAME).orEmpty()
-        trackName = intent?.getStringExtra(EXTRA_TRACK_NAME).orEmpty()
+        track = intent?.let(::readTrackExtra)
         preparePlayer()
         return binder
     }
@@ -144,7 +133,7 @@ class PlayerPlaybackService : Service(), PlayerServiceApi {
     private fun preparePlayer() {
         stopAndRelease()
 
-        val url = previewUrl
+        val url = track?.previewUrl
         if (url.isNullOrBlank()) {
             _state.value = PlayerPlaybackState(playerState = PlayerState.Default)
             return
@@ -199,7 +188,7 @@ class PlayerPlaybackService : Service(), PlayerServiceApi {
     }
 
     private fun formatTime(timeMs: Int): String {
-        return SimpleDateFormat("mm:ss", Locale.getDefault()).format(timeMs)
+        return dateFormat.format(timeMs)
     }
 
     private fun createNotificationChannel() {
@@ -232,7 +221,9 @@ class PlayerPlaybackService : Service(), PlayerServiceApi {
     }
 
     private fun notificationText(): String {
-        val trackText = listOf(artistName, trackName).filter { it.isNotBlank() }.joinToString(" - ")
+        val trackText = listOfNotNull(track?.artistName, track?.trackName)
+            .filter { it.isNotBlank() }
+            .joinToString(" - ")
         return trackText.ifBlank { getString(R.string.app_name) }
     }
 
@@ -243,5 +234,25 @@ class PlayerPlaybackService : Service(), PlayerServiceApi {
         val flags = PendingIntent.FLAG_UPDATE_CURRENT or
                 PendingIntent.FLAG_IMMUTABLE
         return PendingIntent.getActivity(this, 0, intent, flags)
+    }
+
+    private fun readTrackExtra(intent: Intent): TrackUiDto? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(EXTRA_TRACK, TrackUiDto::class.java)
+        } else {
+            @Suppress("DEPRECATION")
+            intent.getParcelableExtra(EXTRA_TRACK) as? TrackUiDto
+        }
+    }
+
+    inner class PlayerPlaybackBinder : Binder() {
+        fun getService(): PlayerPlaybackService = this@PlayerPlaybackService
+    }
+
+    companion object {
+        const val EXTRA_TRACK = "extra_track"
+
+        private const val NOTIFICATION_CHANNEL_ID = "playlist_maker_playback"
+        private const val NOTIFICATION_ID = 1001
     }
 }
