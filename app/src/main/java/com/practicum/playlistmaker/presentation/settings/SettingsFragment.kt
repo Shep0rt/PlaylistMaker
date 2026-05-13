@@ -9,15 +9,19 @@ import android.view.ViewGroup
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.net.toUri
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.fragment.app.Fragment
 import com.practicum.playlistmaker.R
-import com.practicum.playlistmaker.databinding.FragmentSettingsBinding
+import com.practicum.playlistmaker.presentation.settings.ui.SettingsScreen
+import com.practicum.playlistmaker.presentation.ui.theme.PlaylistMakerTheme
+import com.practicum.playlistmaker.presentation.ui.theme.PlaylistMakerScreenTheme
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
 class SettingsFragment : Fragment() {
-
-    private var _binding: FragmentSettingsBinding? = null
-    private val binding get() = _binding!!
 
     private val viewModel: SettingsViewModel by viewModel()
 
@@ -26,76 +30,66 @@ class SettingsFragment : Fragment() {
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentSettingsBinding.inflate(inflater, container, false)
-        return binding.root
-    }
+        return ComposeView(requireContext()).apply {
+            setViewCompositionStrategy(ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed)
+            setContent {
+                val darkThemeEnabled by viewModel.darkModeEnabled.observeAsState(
+                    initial = viewModel.darkModeEnabled.value ?: false
+                )
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
+                LaunchedEffect(darkThemeEnabled) {
+                    AppCompatDelegate.setDefaultNightMode(
+                        if (darkThemeEnabled) AppCompatDelegate.MODE_NIGHT_YES
+                        else AppCompatDelegate.MODE_NIGHT_NO
+                    )
+                }
 
-        setupThemeObserver()
-        setupThemeSwitchListener()
-        setupShareListener()
-        setupSupportListener()
-        setupAgreementListener()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
-
-    private fun setupThemeObserver() {
-        viewModel.darkModeEnabled.observe(viewLifecycleOwner) { isDark ->
-            if (binding.themeSwitch.isChecked != isDark) {
-                binding.themeSwitch.isChecked = isDark
-            }
-
-            AppCompatDelegate.setDefaultNightMode(
-                if (isDark) AppCompatDelegate.MODE_NIGHT_YES
-                else AppCompatDelegate.MODE_NIGHT_NO
-            )
-        }
-    }
-
-    private fun setupThemeSwitchListener() {
-        binding.themeSwitch.setOnCheckedChangeListener { _, checked ->
-            viewModel.setDarkMode(checked)
-        }
-    }
-
-    private fun setupShareListener() {
-        binding.shareText.setOnClickListener { val intent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, getString(R.string.share_app_text))
-            }
-            startActivity(Intent.createChooser(intent, getString(R.string.share_app_title)))
-        }
-    }
-
-    private fun setupSupportListener() {
-        binding.support.setOnClickListener { val email = "mailto:" + Uri.encode(getString(R.string.email_address)) +
-                    "?subject=" + Uri.encode(getString(R.string.support_subject)) +
-                    "&body=" + Uri.encode(getString(R.string.support_body))
-
-            val intent = Intent(Intent.ACTION_SENDTO).apply {
-                data = email.toUri()
-            }
-            if (intent.resolveActivity(requireActivity().packageManager) != null) {
-                startActivity(intent)
-            } else {
-                Toast.makeText(requireContext(), getString(R.string.error_not_app_email), Toast.LENGTH_SHORT).show()
+                PlaylistMakerTheme(
+                    darkTheme = darkThemeEnabled,
+                    screenTheme = PlaylistMakerScreenTheme.Settings,
+                ) {
+                    SettingsScreen(
+                        darkThemeEnabled = darkThemeEnabled,
+                        onDarkThemeEnabledChange = viewModel::setDarkMode,
+                        onShareClick = ::shareApp,
+                        onSupportClick = ::openSupport,
+                        onUserAgreementClick = ::openUserAgreement,
+                    )
+                }
             }
         }
     }
 
-    private fun setupAgreementListener() {
-        binding.userAgreement.setOnClickListener { val intent = Intent(Intent.ACTION_VIEW, getString(R.string.practicum_offer).toUri())
-            if (intent.resolveActivity(requireActivity().packageManager) != null) {
-                startActivity(intent)
-            } else {
-                Toast.makeText(requireContext(), getString(R.string.error_not_app_link), Toast.LENGTH_SHORT).show()
-            }
+    private fun shareApp() {
+        val intent = Intent(Intent.ACTION_SEND).apply {
+            type = "text/plain"
+            putExtra(Intent.EXTRA_TEXT, getString(R.string.share_app_text))
+        }
+        startActivity(Intent.createChooser(intent, getString(R.string.share_app_title)))
+    }
+
+    private fun openSupport() {
+        val email = "mailto:" + Uri.encode(getString(R.string.email_address)) +
+            "?subject=" + Uri.encode(getString(R.string.support_subject)) +
+            "&body=" + Uri.encode(getString(R.string.support_body))
+
+        val intent = Intent(Intent.ACTION_SENDTO).apply {
+            data = email.toUri()
+        }
+
+        if (intent.resolveActivity(requireActivity().packageManager) != null) {
+            startActivity(intent)
+        } else {
+            Toast.makeText(requireContext(), getString(R.string.error_not_app_email), Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    private fun openUserAgreement() {
+        val intent = Intent(Intent.ACTION_VIEW, getString(R.string.practicum_offer).toUri())
+        if (intent.resolveActivity(requireActivity().packageManager) != null) {
+            startActivity(intent)
+        } else {
+            Toast.makeText(requireContext(), getString(R.string.error_not_app_link), Toast.LENGTH_SHORT).show()
         }
     }
 }
